@@ -46,6 +46,7 @@
     background: var(--cream);
     color: var(--navy);
     min-height: 100vh;
+    padding-bottom: 180px; /* Espace pour la barre flottante "Generate" qui peut être haute sur mobile */
   }
 
   /* ── HEADER ── */
@@ -839,10 +840,34 @@
     .summary-grid { grid-template-columns: 1fr 1fr; }
     .sig-grid { grid-template-columns: 1fr; }
     .hero { flex-direction: column; align-items: flex-start; padding: 22px; }
-    .generate-bar { flex-direction: column; align-items: stretch; }
+    .generate-bar { flex-direction: column; align-items: stretch; padding: 10px 12px; }
     .gen-actions { justify-content: stretch; }
-    .gen-actions .btn-generate { flex: 1; justify-content: center; }
+    .gen-actions .btn-generate { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
     .header-right { width: 100%; justify-content: space-between; }
+    body { padding-bottom: 240px; } /* Plus d'espace sur mobile : la barre flottante est plus haute */
+
+    /* Tab-nav-bottom : empiler verticalement sur mobile pour bien voir le bouton Suivant */
+    .tab-nav-bottom {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 14px;
+      gap: 10px;
+    }
+    .tab-nav-bottom .nav-info {
+      text-align: center;
+      order: -1; /* L'info passe au-dessus */
+      min-width: 0;
+    }
+    .btn-tab-nav {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 18px;
+      font-size: 15px;
+    }
+    .btn-tab-nav.next-arrow, .btn-tab-nav.finish {
+      padding: 16px 20px;
+      font-size: 16px;
+    }
   }
 
   /* ═══ SCROLLBARS VISIBLES (Webkit + Firefox) ═══ */
@@ -987,6 +1012,77 @@
     outline: 2px solid var(--blue);
     outline-offset: 1px;
   }
+
+  /* ═══ NAVIGATION SUIVANT / PRÉCÉDENT EN BAS D'ONGLET ═══ */
+  .tab-nav-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--cream) 0%, #F8F4EC 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    flex-wrap: wrap;
+  }
+  .tab-nav-bottom .nav-info {
+    flex: 1;
+    min-width: 180px;
+    font-size: 12.5px;
+    color: var(--grey);
+    font-style: italic;
+  }
+  .tab-nav-bottom .nav-info strong { color: var(--navy); font-style: normal; }
+  .btn-tab-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+  }
+  .btn-tab-nav:hover {
+    background: var(--blue);
+    transform: translateX(2px);
+    box-shadow: 0 4px 10px rgba(46,75,123,0.25);
+  }
+  .btn-tab-nav.prev {
+    background: white;
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+  }
+  .btn-tab-nav.prev:hover {
+    background: var(--cream);
+    transform: translateX(-2px);
+    box-shadow: 0 4px 10px rgba(46,75,123,0.15);
+  }
+  .btn-tab-nav.next-arrow {
+    background: linear-gradient(135deg, var(--gold) 0%, #A87526 100%);
+    padding: 12px 22px;
+    font-size: 15px;
+  }
+  .btn-tab-nav.next-arrow .arrow {
+    font-size: 18px;
+    line-height: 1;
+  }
+  .btn-tab-nav.next-arrow:hover {
+    background: linear-gradient(135deg, #B17F2D 0%, #8F6420 100%);
+    transform: translateX(3px);
+  }
+  .btn-tab-nav.finish {
+    background: linear-gradient(135deg, var(--green) 0%, #167F3E 100%);
+    padding: 12px 22px;
+    font-size: 15px;
+  }
 </style>
 </head>
 <body>
@@ -1054,7 +1150,7 @@
         <span class="lbl">CDP au répertoire</span>
       </div>
       <div class="meta-pill">
-        <span class="num">39</span>
+        <span class="num">62</span>
         <span class="lbl">Constats · 6 directions</span>
       </div>
       <div class="meta-pill">
@@ -1197,6 +1293,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Navigation Suivant -->
+    <div class="tab-nav-bottom">
+      <div class="nav-info">Étape <strong>1 / 5</strong> · Identification — renseignez les informations générales de l'établissement</div>
+      <button class="btn-tab-nav next-arrow" onclick="goToNextTab()">Constats <span class="arrow">➡️</span></button>
+    </div>
   </div>
 
   <!-- ──────────────────────────── TAB: CONSTATS ──────────────────────────── -->
@@ -1221,7 +1323,7 @@
         <div class="status-summary" style="padding: 16px 20px 0;">
           <div class="status-badge badge-issue">🔴 <span id="countIssues">0</span> malfaçon(s)</div>
           <div class="status-badge badge-ok">🟢 <span id="countOk">0</span> conforme(s)</div>
-          <div class="status-badge badge-pending">⚪ <span id="countPending">39</span> en attente</div>
+          <div class="status-badge badge-pending">⚪ <span id="countPending">62</span> en attente</div>
         </div>
         <table class="constats-table">
           <thead>
@@ -1249,6 +1351,39 @@
         <div id="autresConstats"></div>
         <button class="btn-add" onclick="addAutreConstat()">+ Ajouter un autre constat</button>
       </div>
+    </div>
+
+    <!-- ── SCANNER SGP : visible uniquement quand SGP est l'onglet actif ── -->
+    <div class="card" id="sgpScannerCard" style="display:none;border:2px solid #DC2626;">
+      <div class="card-header" style="background:linear-gradient(135deg,#DC2626 0%,#B91C1C 100%);">
+        <div class="card-icon" style="background:rgba(255,255,255,0.2);">📷</div>
+        <div>
+          <div class="card-title" style="color:white;">Scanner de documents patrimoniaux (SGP)</div>
+          <div class="card-subtitle" style="color:#FECACA;">Photographier les documents (titres fonciers, PV de livraison, inventaires) — IA de transcription locale</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="ai-panel" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border-color:#DC2626;margin-bottom:14px;">
+          <div class="ai-panel-title" style="color:#991B1B;">🤖 Comment ça fonctionne ?</div>
+          <div class="ai-panel-text">
+            Photographiez les documents officiels du patrimoine de l'établissement (titres fonciers, plans, PV de réception du matériel, factures, attestations, certificats, registres). Les photos sont rattachées au questionnaire SGP de cet établissement et seront intégrées en <strong>annexe du rapport</strong>. Vous pouvez aussi saisir manuellement les informations transcrites depuis chaque document.
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn btn-red" onclick="document.getElementById('sgpScanInput').click()" style="flex:1;min-width:200px;">📷 Prendre une photo du document</button>
+          <input type="file" id="sgpScanInput" accept="image/*" capture="environment" multiple style="display:none;" onchange="onSgpScanUpload(event)">
+          <button class="btn" onclick="document.getElementById('sgpScanInputGallery').click()" style="flex:1;min-width:200px;">🖼️ Choisir depuis la galerie</button>
+          <input type="file" id="sgpScanInputGallery" accept="image/*" multiple style="display:none;" onchange="onSgpScanUpload(event)">
+        </div>
+        <div id="sgpScanList"></div>
+      </div>
+    </div>
+
+    <!-- Navigation Suivant -->
+    <div class="tab-nav-bottom">
+      <button class="btn-tab-nav prev" onclick="goToPrevTab()">⬅️ Identification</button>
+      <div class="nav-info">Étape <strong>2 / 5</strong> · Constats — répondre OUI/NON pour chaque point de contrôle</div>
+      <button class="btn-tab-nav next-arrow" onclick="goToNextTab()">Observations <span class="arrow">➡️</span></button>
     </div>
   </div>
 
@@ -1294,6 +1429,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Navigation Suivant -->
+    <div class="tab-nav-bottom">
+      <button class="btn-tab-nav prev" onclick="goToPrevTab()">⬅️ Constats</button>
+      <div class="nav-info">Étape <strong>3 / 5</strong> · Observations — appréciation générale et recommandations</div>
+      <button class="btn-tab-nav next-arrow" onclick="goToNextTab()">Réserves <span class="arrow">➡️</span></button>
+    </div>
   </div>
 
   <!-- ──────────────────────────── TAB: RÉSERVES ──────────────────────────── -->
@@ -1320,6 +1462,13 @@
           <button class="btn-add" onclick="addManualReserve()" style="margin-top:12px;">+ Ajouter une réserve manuelle</button>
         </div>
       </div>
+    </div>
+
+    <!-- Navigation Suivant -->
+    <div class="tab-nav-bottom">
+      <button class="btn-tab-nav prev" onclick="goToPrevTab()">⬅️ Observations</button>
+      <div class="nav-info">Étape <strong>4 / 5</strong> · Réserves — synthèse automatique + ajouts manuels</div>
+      <button class="btn-tab-nav next-arrow" onclick="goToNextTab()">Signatures <span class="arrow">➡️</span></button>
     </div>
   </div>
 
@@ -1374,8 +1523,14 @@
         </div>
       </div>
     </div>
-  </div>
 
+    <!-- Navigation : dernier onglet -->
+    <div class="tab-nav-bottom">
+      <button class="btn-tab-nav prev" onclick="goToPrevTab()">⬅️ Réserves</button>
+      <div class="nav-info">Étape <strong>5 / 5</strong> · Signatures — dernière étape, générez votre rapport ci-dessous ⬇️</div>
+      <button class="btn-tab-nav finish" onclick="generateReport()">📄 Générer le Rapport Word</button>
+    </div>
+  </div>
 </div><!-- /container -->
 
 <!-- ════════════════════════════════════════════════════════════════
@@ -1390,9 +1545,9 @@
   <div class="gen-actions">
     <button class="btn-generate secondary" onclick="exportExcel()" title="Export Excel des constats">📊 Excel</button>
     <button class="btn-generate secondary" onclick="shareFiche()" title="Partager par lien">🔗 Partager</button>
-    <button class="btn-generate" onclick="generateReport()">
-      📄 Générer le Rapport Word
-    </button>
+    <button class="btn-generate secondary" onclick="generateReport()" title="Word détaillé avec tableaux constats">📋 Fiche détaillée</button>
+    <button class="btn-generate gold" onclick="composeAndExport('docx')" title="Rapport narratif IA en Word">✨ Rapport IA · Word</button>
+    <button class="btn-generate" onclick="composeAndExport('pdf')" title="Rapport narratif IA en PDF">✨ Rapport IA · PDF</button>
   </div>
 </div>
 <!-- ════════════════════════════════════════════════════════════════
@@ -1453,8 +1608,8 @@
           <option value="dcep">DCEP — Construction & Équipements</option>
           <option value="desps">DESPS — Digitalisation & Informatique</option>
           <option value="daf">DAF — Affaires Financières</option>
-          <option value="dapscoges">DAPS-COGES — Vie scolaire & COGES</option>
-          <option value="sgp">SGP — Secrétariat Général & Patrimoine</option>
+          <option value="dapscoges">DAP-COGES — Animation, Promotion et Suivi des COGES</option>
+          <option value="sgp">SGP — Service de Gestion du Patrimoine</option>
           <option value="drh">DRH — Ressources Humaines</option>
         </select>
       </div>
@@ -1481,8 +1636,8 @@
       <button class="modal-close" onclick="closeModal('modalParams')">×</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--cream);border-radius:8px;padding:4px;">
-        <button class="login-tab active" data-paramtab="firebase" onclick="switchParamTab('firebase')">☁️ Firebase</button>
+      <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--cream);border-radius:8px;padding:4px;flex-wrap:wrap;">
+        <button class="login-tab active" id="paramTabFirebase" data-paramtab="firebase" onclick="switchParamTab('firebase')">☁️ Firebase</button>
         <button class="login-tab" data-paramtab="repertoire" onclick="switchParamTab('repertoire')">📚 Répertoire CDP</button>
         <button class="login-tab" data-paramtab="users" onclick="switchParamTab('users')">👥 Utilisateurs</button>
         <button class="login-tab" data-paramtab="data" onclick="switchParamTab('data')">💾 Données</button>
@@ -1739,7 +1894,7 @@
             <option value="dcep">DCEP — Construction</option>
             <option value="desps">DESPS — Digitalisation</option>
             <option value="daf">DAF — Affaires Financières</option>
-            <option value="dapscoges">DAPS-COGES — Vie scolaire</option>
+            <option value="dapscoges">DAP-COGES — Suivi COGES</option>
             <option value="sgp">SGP — Patrimoine</option>
             <option value="drh">DRH — Ressources Humaines</option>
           </select>
@@ -1822,12 +1977,12 @@ function isValidFbConfig(cfg) {
 
 // Directions partenaires de la mission
 const DIRECTIONS = [
-  { id: 'dcep',     code: 'DCEP',      label: "DCEP — Construction & Équipements Pédagogiques",   color: '#1B4F8A', icon: '🏗️' },
-  { id: 'desps',    code: 'DESPS',     label: "DESPS — Digitalisation & Informatique",            color: '#7B3FBF', icon: '💻' },
-  { id: 'daf',      code: 'DAF',       label: "DAF — Affaires Financières",                       color: '#16A34A', icon: '💰' },
-  { id: 'dapscoges',code: 'DAPS-COGES',label: "DAPS-COGES — Vie scolaire & COGES",                color: '#D97706', icon: '👥' },
-  { id: 'sgp',      code: 'SGP',       label: "SGP — Secrétariat Général & Patrimoine",           color: '#DC2626', icon: '🏛️' },
-  { id: 'drh',      code: 'DRH',       label: "DRH — Ressources Humaines",                        color: '#0891B2', icon: '👤' },
+  { id: 'dcep',     code: 'DCEP',      label: "DCEP — Construction & Équipements Pédagogiques",                                   color: '#1B4F8A', icon: '🏗️' },
+  { id: 'desps',    code: 'DESPS',     label: "DESPS — Digitalisation & Informatique",                                             color: '#7B3FBF', icon: '💻' },
+  { id: 'daf',      code: 'DAF',       label: "DAF — Affaires Financières",                                                        color: '#16A34A', icon: '💰' },
+  { id: 'dapscoges',code: 'DAP-COGES', label: "DAP-COGES — Animation, Promotion et Suivi des Comités de Gestion des Établissements Scolaires", color: '#D97706', icon: '👥' },
+  { id: 'sgp',      code: 'SGP',       label: "SGP — Service de Gestion du Patrimoine",                                            color: '#DC2626', icon: '🏛️' },
+  { id: 'drh',      code: 'DRH',       label: "DRH — Ressources Humaines",                                                         color: '#0891B2', icon: '👤' },
 ];
 
 // Constats par direction
@@ -1869,20 +2024,51 @@ const CONSTATS_BY_DIR = {
     { id: 'coges_bilan',          label: "Comment jugez-vous le bilan des activités de mobilisation de la communauté ? (préciser : Très bien / Bien / Passable / À améliorer)", cat: 'Bilan COGES' },
     { id: 'coges_recommandations',label: "Quelles recommandations pouvez-vous faire pour la bonne marche du COGES ?", cat: 'Recommandations', freeText: true },
     { id: 'coges_fonction',       label: "Quelle est votre fonction au sein du COGES ?",                                              cat: 'Répondant', freeText: true },
+    { id: 'gardien',              label: "Avez-vous un gardien ? Si oui, préciser qui le prend en charge dans la description.",     cat: 'Personnel' },
+    { id: 'salaire_gardien',      label: "Quel est le salaire mensuel du gardien ?",                                                 cat: 'Personnel', freeText: true },
   ],
   sgp: [
-    { id: 'plaque_ident',         label: "Plaque d'identification de l'établissement posée",                 cat: 'Identification' },
-    { id: 'portail',              label: "Borne / portail d'entrée conforme",                                cat: 'Accès' },
-    { id: 'cloture',              label: "Clôture périmétrique complète et sécurisée",                       cat: 'Sécurité' },
-    { id: 'titre_foncier',        label: "Documents de propriété / titre foncier disponibles",               cat: 'Foncier' },
-    { id: 'logement_chef',        label: "Logement de fonction du chef d'établissement (si prévu)",          cat: 'Logements' },
+    { id: 'plaque_ident',         label: "Plaque d'identification de l'établissement posée",                                       cat: 'Identification' },
+    { id: 'portail',              label: "Borne / portail d'entrée conforme",                                                       cat: 'Accès' },
+    { id: 'cloture',              label: "Clôture périmétrique complète et sécurisée",                                              cat: 'Sécurité' },
+    { id: 'titre_foncier',        label: "Documents de propriété / titre foncier disponibles",                                      cat: 'Foncier' },
+    { id: 'logement_chef',        label: "Logement de fonction du chef d'établissement (si prévu)",                                 cat: 'Logements' },
+    { id: 'mat_info_salle',       label: "Avez-vous reçu le matériel informatique pour la salle informatique ?",                    cat: 'Matériel IT' },
+    { id: 'nb_ordinateurs',       label: "Combien d'ordinateurs ont été reçus ? (Bureau / PC portable — préciser dans description)",cat: 'Inventaire IT' },
+    { id: 'mat_cantine',          label: "Avez-vous reçu du matériel pour la cantine ?",                                            cat: 'Cantine' },
+    { id: 'stabilisateur',        label: "Avez-vous un stabilisateur dans le local technique ?",                                    cat: 'Local technique' },
   ],
   drh: [
-    { id: 'bureaux_admin',        label: "Bureaux administratifs (Principal, Censeur, Éducateur) équipés",   cat: 'Bureaux' },
-    { id: 'salle_profs',          label: "Salle des professeurs fonctionnelle",                              cat: 'Enseignants' },
-    { id: 'bureau_chef',          label: "Bureau du chef d'établissement opérationnel",                      cat: 'Direction' },
-    { id: 'conditions_travail',   label: "Conditions de travail des personnels conformes",                   cat: 'Conditions' },
-    { id: 'logements_ens',        label: "Logements de fonction des enseignants (si prévus)",                cat: 'Logements' },
+    // ─── Section 1 : Renseignements établissement (rappel + saisie DRH) ───
+    { id: 'rh_drenaet',           label: "Renseignements — DRENAET de rattachement",                                                  cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_localite',          label: "Renseignements — Localité de l'établissement",                                              cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_nom_etab',          label: "Renseignements — Nom complet de l'établissement",                                           cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_type_base',         label: "Renseignements — Type Base 2 ou Base 4 ? (préciser dans la description)",                   cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_nb_classes_ouv',    label: "Renseignements — Nombre de classes ouvertes",                                               cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_nb_classes_peda',   label: "Renseignements — Nombre de classes pédagogiques",                                           cat: 'Renseign. Établissement', freeText: true },
+    { id: 'rh_effectif_total',    label: "Renseignements — Effectif total des élèves",                                                cat: 'Renseign. Établissement', freeText: true },
+
+    // ─── Section 2 : Personnel Administratif (OUI/NON présence) ───
+    { id: 'rh_principal',         label: "Personnel Administratif — Principal (1 attendu) présent ?",                                 cat: 'Personnel Administratif' },
+    { id: 'rh_ace',               label: "Personnel Administratif — ACE (1 attendu) présent ?",                                       cat: 'Personnel Administratif' },
+    { id: 'rh_intendant',         label: "Personnel Administratif — Intendant (1 attendu) présent ?",                                 cat: 'Personnel Administratif' },
+    { id: 'rh_secretaire',        label: "Personnel Administratif — Secrétaire (1 attendu) présent ?",                                cat: 'Personnel Administratif' },
+
+    // ─── Section 3 : Personnel d'Encadrement (OUI/NON avec ratio attendu) ───
+    { id: 'rh_educateur',         label: "Personnel d'Encadrement — Éducateur (1 pour 280 élèves) en nombre suffisant ?",             cat: "Personnel d'Encadrement" },
+    { id: 'rh_inspecteur_orient', label: "Personnel d'Encadrement — Inspecteur d'Orientation (1 pour 800 élèves) en nombre suffisant ?", cat: "Personnel d'Encadrement" },
+    { id: 'rh_inspecteur_educ',   label: "Personnel d'Encadrement — Inspecteur d'Éducation (1 pour 2 000 élèves) en nombre suffisant ?", cat: "Personnel d'Encadrement" },
+
+    // ─── Section 4 : Personnel Enseignant Base 2 et 4 (OUI/NON) ───
+    { id: 'rh_ens_franc_edhc',    label: "Personnel Enseignant — Français/EDHC (1) présent ?",                                        cat: 'Personnel Enseignant (Base 2 et 4)' },
+    { id: 'rh_ens_franc_hist',    label: "Personnel Enseignant — Français/Histoire-Géo (1) présent ?",                                cat: 'Personnel Enseignant (Base 2 et 4)' },
+    { id: 'rh_ens_math_tice',     label: "Personnel Enseignant — Math/TICE (1) présent ?",                                            cat: 'Personnel Enseignant (Base 2 et 4)' },
+    { id: 'rh_ens_phys_svt',      label: "Personnel Enseignant — Physique/SVT (1) présent ?",                                         cat: 'Personnel Enseignant (Base 2 et 4)' },
+    { id: 'rh_ens_ang_eps',       label: "Personnel Enseignant — Anglais/EPS (1) présent ?",                                          cat: 'Personnel Enseignant (Base 2 et 4)' },
+    { id: 'rh_ens_arts',          label: "Personnel Enseignant — Arts plastiques / Musique (selon le besoin) présent ?",              cat: 'Personnel Enseignant (Base 2 et 4)' },
+
+    // ─── Section 5 : Point d'attention / Recommandation (champ libre) ───
+    { id: 'rh_point_attention',   label: "Point d'attention — Pour les CDP à Base 4, l'effectif du personnel enseignant doit être doublé à partir de la deuxième année qui précède l'ouverture officielle. Observations / recommandations ?", cat: "Point d'attention", freeText: true },
   ],
 };
 
@@ -2019,6 +2205,7 @@ function createEtab() {
     signaturesByDir: sigs,
     sigChef: { name:'', etab:'', dataUrl:'' },
     sigEnt: { name:'', entreprise:'', dataUrl:'' },
+    sgpDocs: [],  // documents scannés SGP : [{ id, dataUrl, label, transcription, addedAt }]
   };
 }
 
@@ -2099,6 +2286,9 @@ function saveLocal(key) {
 // ═══════════════════════════════════════════════════════════════════
 // TABS PRINCIPAUX
 // ═══════════════════════════════════════════════════════════════════
+// Ordre séquentiel des onglets pour navigation Suivant/Précédent
+const TAB_ORDER = ['identification', 'constats', 'observations', 'reserves', 'signatures'];
+
 function switchTab(tab, ev) {
   // Sauvegarder l'état actuel avant de changer
   if (state.currentFiche) saveCurrentEtab();
@@ -2106,10 +2296,34 @@ function switchTab(tab, ev) {
   document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
   const panel = $('tab-' + tab);
   if (panel) panel.classList.add('active');
-  if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+  // Si appel via event, marquer le bouton qui a déclenché ; sinon retrouver le bouton correspondant
+  if (ev && ev.currentTarget) {
+    ev.currentTarget.classList.add('active');
+  } else {
+    const btn = document.querySelector(`.tabs-nav .tab-btn[onclick*="'${tab}'"]`);
+    if (btn) btn.classList.add('active');
+  }
   state.currentTab = tab;
   if (tab === 'signatures') { buildSummary(); renderSignatures(); }
   if (tab === 'reserves') renderReservesSynthesis();
+}
+
+// Navigation Suivant / Précédent depuis les boutons en bas d'onglet
+function goToNextTab() {
+  const i = TAB_ORDER.indexOf(state.currentTab);
+  if (i < 0 || i >= TAB_ORDER.length - 1) return;
+  const next = TAB_ORDER[i + 1];
+  switchTab(next);
+  // Scroll en haut de la page pour voir le nouvel onglet
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToPrevTab() {
+  const i = TAB_ORDER.indexOf(state.currentTab);
+  if (i <= 0) return;
+  const prev = TAB_ORDER[i - 1];
+  switchTab(prev);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2282,6 +2496,7 @@ function ensureConstatStructure(etab) {
   }
   if (!etab.sigChef) etab.sigChef = { name:'', etab:'', dataUrl:'' };
   if (!etab.sigEnt) etab.sigEnt = { name:'', entreprise:'', dataUrl:'' };
+  if (!Array.isArray(etab.sgpDocs)) etab.sgpDocs = [];
 }
 
 function loadEtab(idx) {
@@ -2308,6 +2523,7 @@ function loadEtab(idx) {
   renderDirSubTabs();
   renderConstats(idx);
   renderAutresConstats(idx);
+  renderSgpScanner();
   renderReservesSynthesis();
 
   updateProgress();
@@ -2451,7 +2667,109 @@ function switchDir(dirId) {
   renderDirSubTabs();
   renderConstats(state.currentEtab);
   renderAutresConstats(state.currentEtab);
+  renderSgpScanner();
   updateCounters();
+}
+
+// ─── SCANNER SGP : panneau visible uniquement quand SGP est l'onglet actif ───
+function renderSgpScanner() {
+  const card = $('sgpScannerCard');
+  if (!card) return;
+  if (state.currentDir !== 'sgp') {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  const list = $('sgpScanList');
+  if (!e.sgpDocs.length) {
+    list.innerHTML = '<div class="empty" style="padding:20px;text-align:center;color:var(--grey);font-style:italic;">Aucun document scanné. Utilisez les boutons ci-dessus pour photographier ou téléverser des documents officiels du patrimoine.</div>';
+    return;
+  }
+  list.innerHTML = e.sgpDocs.map((d, i) => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;background:white;">
+      <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+        <img src="${d.dataUrl}" alt="Document ${i+1}" style="width:140px;height:140px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;flex-shrink:0;" onclick="openSgpDocFull(${i})">
+        <div style="flex:1;min-width:200px;">
+          <div class="form-group" style="margin-bottom:8px;">
+            <label style="font-size:11px;">Type / Libellé du document</label>
+            <input type="text" value="${escapeHtml(d.label || '')}" placeholder="ex: Titre foncier, PV de réception, Facture matériel info, Attestation..." oninput="updateSgpDoc(${i},'label',this.value)">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:11px;">Transcription / Notes (informations clés du document)</label>
+            <textarea rows="3" placeholder="Saisir manuellement les informations clés visibles sur le document (références, dates, montants, signataires...)" oninput="updateSgpDoc(${i},'transcription',this.value)" style="font-size:12.5px;">${escapeHtml(d.transcription || '')}</textarea>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);">
+        <span style="font-size:11px;color:var(--grey);">📷 Doc ${i+1}/${e.sgpDocs.length} · Ajouté ${d.addedAt ? new Date(d.addedAt).toLocaleString('fr-FR') : ''}</span>
+        <button class="btn btn-red" style="padding:5px 10px;font-size:11.5px;" onclick="removeSgpDoc(${i})">🗑️ Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function onSgpScanUpload(ev) {
+  const files = Array.from(ev.target.files || []);
+  if (!files.length) return;
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  let nAdded = 0;
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const dataUrl = await compressImage(file, 1600, 0.8);
+    e.sgpDocs.push({
+      id: uuid(),
+      dataUrl,
+      label: '',
+      transcription: '',
+      addedAt: new Date().toISOString(),
+    });
+    nAdded++;
+  }
+  ev.target.value = ''; // permettre de reuploader le même fichier
+  renderSgpScanner();
+  saveFicheNow(true);
+  toast(`${nAdded} document(s) scanné(s) — saisir le libellé et la transcription`, 'success');
+}
+
+function updateSgpDoc(idx, field, value) {
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e || !e.sgpDocs[idx]) return;
+  e.sgpDocs[idx][field] = value;
+}
+
+function removeSgpDoc(idx) {
+  if (!confirm('Supprimer ce document scanné ?')) return;
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e || !e.sgpDocs[idx]) return;
+  e.sgpDocs.splice(idx, 1);
+  renderSgpScanner();
+  saveFicheNow(true);
+  toast('Document supprimé', 'success');
+}
+
+function openSgpDocFull(idx) {
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e || !e.sgpDocs[idx]) return;
+  const d = e.sgpDocs[idx];
+  // Ouvrir l'image dans une fenêtre modale plein écran
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:20px;';
+  overlay.onclick = () => overlay.remove();
+  const img = document.createElement('img');
+  img.src = d.dataUrl;
+  img.style.cssText = 'max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Fermer';
+  closeBtn.style.cssText = 'position:absolute;top:20px;right:20px;background:white;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:600;';
+  closeBtn.onclick = () => overlay.remove();
+  overlay.appendChild(img);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
 }
 
 function renderConstats(etabIdx) {
@@ -3709,17 +4027,29 @@ function loadFicheFromList(id) {
 // PARAMS MODAL
 // ═══════════════════════════════════════════════════════════════════
 function openParamsModal() {
-  // Charger config actuelle
-  let userCfg = null;
-  try { userCfg = JSON.parse(localStorage.getItem(LS.fbConfig) || 'null'); } catch(e) {}
-  const usingDefault = !userCfg && isValidFbConfig(DEFAULT_FB_CONFIG);
-  const banner = $('fbDefaultBanner');
-  if (banner) banner.style.display = usingDefault ? '' : 'none';
-  // Pré-remplir : config user > config défaut > vide
-  const effective = userCfg || (isValidFbConfig(DEFAULT_FB_CONFIG) ? DEFAULT_FB_CONFIG : null);
-  $('fbConfigInput').value = effective ? JSON.stringify(effective, null, 2) : '';
-  // Visibilité admin
-  if (isAdmin()) {
+  const admin = isAdmin();
+  // Onglet Firebase : visible uniquement à l'admin
+  const btnFb = $('paramTabFirebase');
+  if (btnFb) btnFb.style.display = admin ? '' : 'none';
+
+  if (admin) {
+    // Charger config actuelle
+    let userCfg = null;
+    try { userCfg = JSON.parse(localStorage.getItem(LS.fbConfig) || 'null'); } catch(e) {}
+    const usingDefault = !userCfg && isValidFbConfig(DEFAULT_FB_CONFIG);
+    const banner = $('fbDefaultBanner');
+    if (banner) banner.style.display = usingDefault ? '' : 'none';
+    const effective = userCfg || (isValidFbConfig(DEFAULT_FB_CONFIG) ? DEFAULT_FB_CONFIG : null);
+    $('fbConfigInput').value = effective ? JSON.stringify(effective, null, 2) : '';
+  } else {
+    // Si l'utilisateur n'est pas admin et que Firebase était l'onglet actif, basculer sur Répertoire
+    if ($('paramPaneFirebase').style.display !== 'none') {
+      switchParamTab('repertoire');
+    }
+  }
+
+  // Visibilité admin pour onglet utilisateurs
+  if (admin) {
     $('usersAdminOnly').style.display = '';
     $('usersNotAdmin').style.display = 'none';
     renderUsersTable();
@@ -3844,8 +4174,8 @@ function deleteCdp() {
   toast('Établissement supprimé', 'success');
 }
 
-function exportRepertoireXlsx() {
-  if (!window.XLSX) return toast('Bibliothèque Excel non chargée', 'error');
+async function exportRepertoireXlsx() {
+  try { await window.ensureLib('xlsx'); } catch(e) { return; }
   const rows = [['N°','Nom de l\'Établissement','Chef d\'Établissement','Fonction','Téléphone','Email','DRENAET','Localité']];
   state.repertoire.forEach((c, i) => rows.push([i+1, c.nom, c.chef, c.fonction, c.tel, c.email, c.drena, c.localite]));
   const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -4035,8 +4365,8 @@ async function renderPublicFiche(ficheId) {
 // ═══════════════════════════════════════════════════════════════════
 // EXPORT EXCEL DES CONSTATS
 // ═══════════════════════════════════════════════════════════════════
-function exportExcel() {
-  if (!window.XLSX) return toast('Bibliothèque Excel non chargée', 'error');
+async function exportExcel() {
+  try { await window.ensureLib('xlsx'); } catch(e) { return; }
   collectFicheFromUI();
   const f = state.currentFiche;
   if (!f) return;
@@ -4092,6 +4422,27 @@ function exportExcel() {
 // ═══════════════════════════════════════════════════════════════════
 // GÉNÉRATEUR DE RAPPORT — Templating LOCAL (sans API)
 // ═══════════════════════════════════════════════════════════════════
+
+// Composer (templating) puis exporter en un clic — format = 'docx' | 'pdf'
+async function composeAndExport(format) {
+  collectFicheFromUI();
+  const f = state.currentFiche;
+  if (!f) return toast('Aucune fiche active', 'error');
+  try {
+    const text = composeReportText(f);
+    state.currentFiche.aiReport = text;
+    saveFicheNow(true);
+    if (format === 'pdf') {
+      await downloadAiReportPdf();
+    } else {
+      await downloadAiReportDocx();
+    }
+  } catch(e) {
+    console.error(e);
+    toast('Erreur génération : ' + e.message, 'error');
+  }
+}
+
 function generateAiReport() {
   collectFicheFromUI();
   const f = state.currentFiche;
@@ -4128,208 +4479,600 @@ function composeReportText(f) {
   const numR = f.numRapport || 'En cours d\'attribution';
   const nbEtabs = f.etabs.length;
 
-  const parts = [];
+  // Préparer données analytiques pour toutes les sections
+  let totalIssues = 0;
+  let totalPoints = 0;
+  const cdpAnalysis = []; // [{college, chef, drena, nIssues, totalPts, themes, cogesStatus, cogesActions, despsData, ...}]
 
-  // ─── 1. INTRODUCTION ───
-  parts.push(`I. INTRODUCTION
-
-Le présent rapport rend compte de la mission conjointe de visite technique préalable à la réception définitive des Collèges de Proximité (CDP) de la région de San Pédro, conduite le ${dateStr} sous la coordination de ${enq}. Cette mission s'inscrit dans le cadre du suivi post-réception provisoire des infrastructures éducatives construites pour le compte du Ministère de l'Éducation Nationale, de l'Alphabétisation et de l'Enseignement Technique (MENAET).
-
-La mission a mobilisé six directions techniques du Ministère — la DCEP (construction et équipements pédagogiques), la DESPS (digitalisation et statistiques), la DAF (affaires financières), la DAPS-COGES (vie scolaire et gouvernance communautaire), la SGP (secrétariat général et patrimoine) et la DRH (ressources humaines) — afin d'évaluer chaque établissement sous l'angle des compétences spécifiques à chacune. Au total, ${nbEtabs} établissement${nbEtabs>1?'s ont été visités':' a été visité'} dans le cadre de la présente fiche (rapport n° ${numR}).`);
-
-  // ─── 2. IDENTIFICATION ÉTABLISSEMENTS ───
-  parts.push(`II. IDENTIFICATION DES ÉTABLISSEMENTS VISITÉS
-
-${f.etabs.map((e, i) => {
-  const college = e.college || `Établissement n°${i+1}`;
-  const localite = e.localite || 'localité non précisée';
-  const chef = e.chef || 'chef d\'établissement non communiqué';
-  const ent = e.entreprise || 'entreprise non communiquée';
-  return `${i+1}. ${college} (localité de ${localite}), placé sous la responsabilité de ${chef}, construit par l'entreprise ${ent}.`;
-}).join('\n')}`);
-
-  // ─── 3. MÉTHODOLOGIE ───
-  parts.push(`III. MÉTHODOLOGIE DE LA VISITE CONJOINTE
-
-La visite a été conduite selon une grille structurée commune à toutes les directions, déclinée en questionnaires spécifiques par champ de compétence. Pour chaque constat, les enquêteurs ont indiqué une réponse OUI (malfaçon ou non-conformité avérée) ou NON (conformité avérée), accompagnée d'une description technique et, le cas échéant, de photographies probantes. Les constats positifs (OUI) ont été automatiquement convertis en réserves contractuelles à notifier à l'entreprise constructrice, avec un délai indicatif de levée fonction de la nature de l'anomalie.
-
-DRENAET de rattachement : ${drena}. La présente fiche couvre ${nbEtabs} établissement${nbEtabs>1?'s':''}.`);
-
-  // ─── 4. CONSTATS PAR DIRECTION ───
-  let constatsSection = `IV. CONSTATS TECHNIQUES PAR DIRECTION\n`;
-
-  DIRECTIONS.forEach(d => {
-    const list = CONSTATS_BY_DIR[d.id] || [];
-    const dirName = d.label.split('—')[1]?.trim() || d.code;
-
-    // Agréger tous les constats OUI de tous les établissements pour cette direction
-    let allIssues = [];
-    let allOk = 0;
-    let freeTextAnswers = [];
-    let allAutres = [];
-
-    f.etabs.forEach((e, eIdx) => {
-      const cstDir = (e.constats && e.constats[d.id]) || {};
-      list.forEach(c => {
-        const x = cstDir[c.id];
-        if (!x) return;
-        if (c.freeText) {
-          if ((x.description || '').trim()) {
-            freeTextAnswers.push({ etab: e.college || `Étab. ${eIdx+1}`, question: c.label, reponse: x.description });
-          }
-        } else {
-          if (x.reponse === 'OUI') {
-            allIssues.push({ etab: e.college || `Étab. ${eIdx+1}`, constat: c.label, cat: c.cat, desc: x.description || '' });
-          } else if (x.reponse === 'NON') {
-            allOk++;
-          }
-        }
-      });
-      const autres = ((e.autresConstats || {})[d.id] || []).filter(s => s.trim());
-      autres.forEach(a => allAutres.push({ etab: e.college || `Étab. ${eIdx+1}`, desc: a }));
-    });
-
-    if (!allIssues.length && !freeTextAnswers.length && !allAutres.length && allOk === 0) {
-      return; // skip cette direction si aucune donnée saisie
-    }
-
-    constatsSection += `\n${d.code} — ${dirName}\n`;
-    constatsSection += `${'─'.repeat(50)}\n`;
-
-    if (allIssues.length === 0 && allAutres.length === 0 && freeTextAnswers.length === 0 && allOk > 0) {
-      constatsSection += `Les vérifications de la direction ${d.code} n'ont relevé aucune malfaçon : ${allOk} constat${allOk>1?'s sont':' est'} conforme${allOk>1?'s':''}.\n`;
-    } else {
-      if (allIssues.length > 0) {
-        constatsSection += `${allIssues.length} non-conformité${allIssues.length>1?'s ont':' a'} été relevée${allIssues.length>1?'s':''} au titre des compétences ${d.code}`;
-        if (allOk > 0) constatsSection += `, contre ${allOk} constat${allOk>1?'s':''} conforme${allOk>1?'s':''}`;
-        constatsSection += '.\n\n';
-        // Détailler
-        allIssues.forEach((iss, i) => {
-          constatsSection += `• [${iss.etab}] ${iss.constat} (${iss.cat})`;
-          if (iss.desc.trim()) constatsSection += ` : ${iss.desc.trim()}`;
-          constatsSection += '.\n';
-        });
-      }
-      if (allAutres.length > 0) {
-        constatsSection += `\nConstats additionnels signalés par les enquêteurs :\n`;
-        allAutres.forEach(a => constatsSection += `• [${a.etab}] ${a.desc.trim()}.\n`);
-      }
-      if (freeTextAnswers.length > 0) {
-        constatsSection += `\nRéponses aux questions ouvertes :\n`;
-        freeTextAnswers.forEach(q => {
-          constatsSection += `• [${q.etab}] ${q.question} → ${q.reponse.trim()}\n`;
-        });
-      }
-    }
-  });
-
-  parts.push(constatsSection);
-
-  // ─── 5. RÉSERVES ───
-  let nReserves = 0;
-  let nReservesMan = 0;
-  f.etabs.forEach(e => {
+  f.etabs.forEach((e, idx) => {
+    ensureConstatStructure(e);
+    let nIss = 0, nPts = 0;
+    const themesIssues = [];
     DIRECTIONS.forEach(d => {
       (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
         if (c.freeText) return;
-        const x = ((e.constats || {})[d.id] || {})[c.id];
-        if (x && x.reponse === 'OUI') nReserves++;
+        nPts++;
+        const x = (e.constats[d.id] || {})[c.id];
+        if (x && x.reponse === 'OUI') {
+          nIss++;
+          themesIssues.push({ dir: d.code, theme: c.cat, label: c.label, desc: x.description || '' });
+        }
       });
     });
-    nReservesMan += (e.reservesManual || []).length;
+    totalIssues += nIss;
+    totalPoints += nPts;
+
+    // Extraction des champs libres DAP-COGES
+    const cogesData = (e.constats.dapscoges || {});
+    const cogesExiste = (cogesData.coges_existe || {}).reponse === 'OUI';
+    const cogesFonctionnel = (cogesData.coges_fonctionnel || {}).reponse === 'OUI';
+    const cogesSensib = (cogesData.coges_sensibilisation || {}).reponse === 'OUI';
+    const cogesBilanText = (cogesData.coges_bilan || {}).description || '';
+    const cogesReco = (cogesData.coges_recommandations || {}).description || '';
+    const cogesFonctRep = (cogesData.coges_fonction || {}).description || '';
+
+    // Extraction des champs DESPS (codes ouverture, effectifs, immatriculation)
+    const despsData = (e.constats.desps || {});
+    const arreteOuverture = (despsData.arrete_ouverture || {});
+    const effectif = (despsData.effectif_eleves || {});
+    const reseau = (despsData.reseau || {});
+    const immatric = (despsData.immatriculation || {});
+    const corrections = (despsData.corrections || {});
+    const denom = (despsData.denomination || {});
+
+    cdpAnalysis.push({
+      idx,
+      college: e.college || `Établissement ${idx+1}`,
+      chef: e.chef || '—',
+      drena: f.drena || drena,
+      localite: e.localite || '—',
+      entreprise: e.entreprise || '—',
+      nIssues: nIss, totalPts: nPts,
+      themes: themesIssues,
+      coges: {
+        existe: cogesExiste,
+        fonctionnel: cogesFonctionnel,
+        sensib: cogesSensib,
+        bilan: cogesBilanText,
+        reco: cogesReco,
+        fonctionRepondant: cogesFonctRep,
+      },
+      desps: {
+        arrete: arreteOuverture,
+        effectif,
+        reseau,
+        immatric,
+        corrections,
+        denom,
+      },
+      etatGlobal: e.etatGlobal,
+      fonctionnalite: e.fonctionnalite,
+      observations: e.observations,
+      recommandations: e.recommandations,
+      nManualReserves: (e.reservesManual || []).length,
+      sgpDocs: e.sgpDocs || [],
+    });
   });
-  const totalReserves = nReserves + nReservesMan;
-  let reservesText = `V. RÉSERVES NOTIFIÉES\n\n`;
-  if (totalReserves === 0) {
-    reservesText += `Aucune réserve n'a été notifiée à l'issue de la mission. Les établissements visités sont jugés conformes au cahier des charges contractuel et peuvent être réceptionnés définitivement sous réserve de la validation hiérarchique.`;
+
+  const tauxNC = totalPoints ? (100 * totalIssues / totalPoints).toFixed(1) : '0.0';
+  const cogesFonctList = cdpAnalysis.filter(c => c.coges.fonctionnel);
+  const cogesNonFonctList = cdpAnalysis.filter(c => c.coges.existe && !c.coges.fonctionnel);
+
+  // Regrouper les non-conformités par thématique
+  const themesAgg = {}; // { theme: [ {college, label, desc}, ... ] }
+  cdpAnalysis.forEach(cdp => {
+    cdp.themes.forEach(t => {
+      const key = t.theme;
+      if (!themesAgg[key]) themesAgg[key] = [];
+      themesAgg[key].push({ college: cdp.college, label: t.label, desc: t.desc, dir: t.dir });
+    });
+  });
+
+  const parts = [];
+
+  // ════════════════════════════════════════════════════════════════════
+  // PAGE DE GARDE / HEADER
+  // ════════════════════════════════════════════════════════════════════
+  parts.push(`MINISTÈRE DE L'ÉDUCATION NATIONALE, DE L'ALPHABÉTISATION ET DE L'ENSEIGNEMENT TECHNIQUE
+DIRECTION DE LA COORDINATION ET DE L'EXÉCUTION DES PROJETS (DCEP)
+Mission conjointe DCEP · DESPS · DAF · DAP-COGES · SGP · DRH
+
+RAPPORT GÉNÉRAL DE MISSION
+Mission conjointe et contradictoire de visite technique
+post-réception provisoire des Collèges de Proximité (CDP)
+
+DRENAET de ${drena} — Région ${drena}
+${dateStr}
+
+═══════════════════════════════════════════════════════════════════
+PÉRIMÈTRE
+${nbEtabs} CDP visité${nbEtabs>1?'s':''}    ·    ${totalPoints} points de contrôle    ·    6 directions techniques
+
+RÉSULTATS
+${totalIssues} non-conformités relevées    ·    Taux global : ${tauxNC} %
+${cogesFonctList.length} COGES fonctionnel${cogesFonctList.length>1?'s':''} sur ${cdpAnalysis.filter(c=>c.coges.existe).length || nbEtabs}
+═══════════════════════════════════════════════════════════════════
+
+Rapport n° ${numR}    ·    Coordonnateur : ${enq}`);
+
+  // ════════════════════════════════════════════════════════════════════
+  // SOMMAIRE
+  // ════════════════════════════════════════════════════════════════════
+  parts.push(`SOMMAIRE
+
+I.     CONTEXTE ET CADRE DE LA MISSION
+II.    MÉTHODOLOGIE
+III.   TABLEAU DE SYNTHÈSE GÉNÉRALE PAR ÉTABLISSEMENT
+IV.    ANALYSE THÉMATIQUE CONSOLIDÉE DES NON-CONFORMITÉS
+V.     ÉVALUATION DÉTAILLÉE PAR ÉTABLISSEMENT
+VI.    ÉVALUATION DES COMITÉS DE GESTION (COGES)
+VII.   ÉVALUATION DESPS — EFFECTIFS ET ENJEUX ADMINISTRATIFS
+VIII.  RECOMMANDATIONS GÉNÉRALES DE LA MISSION
+IX.    CONCLUSION
+ANNEXE.   RÉCAPITULATIF PAR ÉTABLISSEMENT`);
+
+  // ════════════════════════════════════════════════════════════════════
+  // I. CONTEXTE ET CADRE
+  // ════════════════════════════════════════════════════════════════════
+  parts.push(`I. CONTEXTE ET CADRE DE LA MISSION
+
+Dans le cadre de la mise en œuvre des programmes de construction des Collèges de Proximité (CDP) en Côte d'Ivoire, plusieurs établissements ont été édifiés et équipés dans les régions ciblées par le Ministère de l'Éducation Nationale, de l'Alphabétisation et de l'Enseignement Technique (MENAET). Ces établissements ayant fait l'objet de réceptions provisoires, la Direction de la Coordination et de l'Exécution des Projets (DCEP) du MENAET conduit, conformément aux dispositions du Code des marchés publics ivoirien, une mission de visite technique post-réception provisoire.
+
+Cette mission a pour objet de procéder à l'inspection technique des infrastructures, des équipements et des aménagements extérieurs de chaque CDP, en vue de la réception définitive des ouvrages au cours de l'année en cours. Les constats établis constituent des éléments contractuellement opposables aux entreprises titulaires des marchés de travaux et d'équipements.
+
+Le présent rapport consolidé rend compte de la mission menée par les six directions partenaires (DCEP, DESPS, DAF, DAP-COGES, SGP et DRH) le ${dateStr}, dans la DRENAET de ${drena}. Au total, ${nbEtabs === 1 ? 'un (01)' : nbEtabs + ' (' + String(nbEtabs).padStart(2, '0') + ')'} Collège${nbEtabs>1?'s':''} de Proximité ${nbEtabs>1?'ont été visités':'a été visité'}.`);
+
+  // ════════════════════════════════════════════════════════════════════
+  // II. MÉTHODOLOGIE
+  // ════════════════════════════════════════════════════════════════════
+  parts.push(`II. MÉTHODOLOGIE
+
+Pour chaque établissement visité, l'équipe de mission a procédé selon la méthodologie suivante :
+
+- Une rencontre avec le Chef d'Établissement pour recueillir les malfaçons et difficultés constatées pendant l'exploitation des ouvrages.
+- Une inspection technique détaillée des bâtiments, des équipements et des aménagements extérieurs, portant sur ${totalPoints/nbEtabs|0} points de contrôle standardisés par établissement.
+- L'identification, la qualification et la documentation des malfaçons et non-conformités constatées par chacune des six directions partenaires.
+- Une séance d'évaluation avec les membres du COGES (Comité de Gestion des Établissements Scolaires).
+- Une analyse des données administratives (effectifs, immatriculations, codes d'ouverture) sous la responsabilité de la DESPS.
+
+Les directions partenaires ont chacune mobilisé leur propre questionnaire spécifique : la DCEP (13 points sur le gros œuvre, le second œuvre, les VRD et les équipements), la DESPS (6 questions sur les données administratives et statistiques), la DAF (5 points sur la conformité financière), la DAP-COGES — Direction d'Animation, de Promotion et de Suivi des Comités de Gestion des Établissements Scolaires (8 questions sur le COGES et le gardiennage, dont 3 ouvertes), la SGP — Service de Gestion du Patrimoine (9 points sur le patrimoine, les équipements informatiques, la cantine et le local technique) et la DRH — Direction des Ressources Humaines (21 questions structurées en cinq sections : renseignements établissement, personnel administratif, personnel d'encadrement, personnel enseignant Base 2 et 4, et point d'attention sur le doublement des effectifs en Base 4), soit ${totalPoints/nbEtabs|0} points de contrôle au total par établissement.`);
+
+  // ════════════════════════════════════════════════════════════════════
+  // III. TABLEAU DE SYNTHÈSE GÉNÉRALE
+  // ════════════════════════════════════════════════════════════════════
+  let tableauSynth = `III. TABLEAU DE SYNTHÈSE GÉNÉRALE PAR ÉTABLISSEMENT
+
+Le tableau ci-après présente le bilan quantitatif des non-conformités relevées dans chaque CDP, les principales malfaçons identifiées, et l'état des COGES. Le code de gravité retenu est le suivant : vert (0–4 non-conformités), orange (5–7), rouge (8 et plus).
+
+`;
+  cdpAnalysis.forEach((cdp, i) => {
+    const gravity = cdp.nIssues >= 8 ? '🔴 CRITIQUE' : (cdp.nIssues >= 5 ? '🟠 ATTENTION' : '🟢 ACCEPTABLE');
+    const topThemes = [...new Set(cdp.themes.map(t => t.theme))].slice(0, 5).join(', ') || 'aucune non-conformité majeure';
+    tableauSynth += `${i+1}. ${cdp.college} (${cdp.drena}) — ${cdp.nIssues}/${cdp.totalPts} non-conf. — ${gravity}\n   Principales malfaçons : ${topThemes}\n   COGES : ${cdp.coges.fonctionnel ? '✓ Fonctionnel' : (cdp.coges.existe ? 'Constitué mais non fonctionnel' : 'Non constitué / non évalué')}\n\n`;
+  });
+  tableauSynth += `TOTAL MISSION : ${totalIssues}/${totalPoints} non-conformités — Taux global de non-conformité : ${tauxNC} %`;
+  parts.push(tableauSynth);
+
+  // ════════════════════════════════════════════════════════════════════
+  // IV. ANALYSE THÉMATIQUE CONSOLIDÉE
+  // ════════════════════════════════════════════════════════════════════
+  let analyseTh = `IV. ANALYSE THÉMATIQUE CONSOLIDÉE DES NON-CONFORMITÉS\n\n`;
+
+  if (Object.keys(themesAgg).length === 0) {
+    analyseTh += `Aucune non-conformité n'a été identifiée à l'issue de la mission. Les établissements visités sont jugés conformes aux cahiers des charges contractuels.`;
   } else {
-    reservesText += `${totalReserves} réserve${totalReserves>1?'s sont':' est'} notifiée${totalReserves>1?'s':''} à l'entreprise constructrice à l'issue de la mission, dont ${nReserves} générée${nReserves>1?'s':''} automatiquement à partir des constats OUI et ${nReservesMan} ajoutée${nReservesMan>1?'s':''} manuellement par les enquêteurs. Chaque réserve fait l'objet d'un délai indicatif de levée (15 jours pour le gros œuvre et les questions de sécurité, 30 jours pour les autres natures de travaux). Le tableau détaillé des réserves est annexé au présent rapport.`;
+    // Trier les thèmes par fréquence décroissante
+    const sortedThemes = Object.entries(themesAgg).sort((a, b) => b[1].length - a[1].length);
+    let n = 1;
+    sortedThemes.forEach(([theme, occurrences]) => {
+      const colleges = [...new Set(occurrences.map(o => o.college))];
+      analyseTh += `4.${n}  ${theme} — ${occurrences.length} occurrence${occurrences.length>1?'s':''} sur ${colleges.length} établissement${colleges.length>1?'s':''}\n\n`;
+      analyseTh += `Les non-conformités relevant de la thématique "${theme}" ont été observées dans ${colleges.length === 1 ? 'le seul établissement de ' + colleges[0] : 'les établissements suivants : ' + colleges.join(', ')}. `;
+      analyseTh += `Sur cette thématique, les principaux constats sont les suivants :\n\n`;
+      occurrences.slice(0, 8).forEach(o => {
+        analyseTh += `- [${o.college}] ${o.label}${o.desc.trim() ? ' — ' + o.desc.trim() : ''}\n`;
+      });
+      if (occurrences.length > 8) analyseTh += `- (${occurrences.length - 8} autre${occurrences.length-8>1?'s':''} occurrence${occurrences.length-8>1?'s':''} non détaillée${occurrences.length-8>1?'s':''})\n`;
+      analyseTh += `\nCes constats constituent des réserves contractuelles opposables aux entreprises titulaires des marchés, à lever dans les délais prescrits avant réception définitive.\n\n`;
+      n++;
+    });
   }
-  parts.push(reservesText);
+  parts.push(analyseTh);
 
-  // ─── 6. CONCLUSION ───
-  let etatLine = '';
-  const etats = f.etabs.map(e => e.etatGlobal).filter(x => x);
-  if (etats.length) {
-    etatLine = `\n\nL'état global des établissements visités est apprécié comme suit : ${etats.join(' ; ')}.`;
+  // ════════════════════════════════════════════════════════════════════
+  // V. ÉVALUATION DÉTAILLÉE PAR ÉTABLISSEMENT
+  // ════════════════════════════════════════════════════════════════════
+  let evalEtab = `V. ÉVALUATION DÉTAILLÉE PAR ÉTABLISSEMENT\n\n`;
+  cdpAnalysis.forEach((cdp, i) => {
+    const taux = cdp.totalPts ? (100 - (100 * cdp.nIssues / cdp.totalPts)).toFixed(0) : '100';
+    let appreciation;
+    if (cdp.nIssues === 0) appreciation = 'Excellent — réception définitive envisageable sans réserve majeure';
+    else if (cdp.nIssues <= 4) appreciation = 'Satisfaisant — réception définitive sous réserve de la levée des points identifiés';
+    else if (cdp.nIssues <= 7) appreciation = 'Acceptable avec réserves — levée prioritaire requise avant réception définitive';
+    else appreciation = 'Critique — réception définitive subordonnée à la régularisation complète des malfaçons constatées';
+
+    evalEtab += `5.${i+1}  ${cdp.college}\n`;
+    evalEtab += `Chef d'établissement : ${cdp.chef} · Localité : ${cdp.localite} · Entreprise : ${cdp.entreprise}\n\n`;
+    evalEtab += `Bilan technique : ${cdp.nIssues} non-conformité${cdp.nIssues>1?'s':''} sur ${cdp.totalPts} points contrôlés (taux de conformité : ${taux} %).\n\n`;
+
+    if (cdp.themes.length > 0) {
+      evalEtab += `Principaux constats par direction :\n`;
+      const byDir = {};
+      cdp.themes.forEach(t => { if (!byDir[t.dir]) byDir[t.dir] = []; byDir[t.dir].push(t); });
+      Object.entries(byDir).forEach(([dirCode, items]) => {
+        evalEtab += `- ${dirCode} (${items.length}) : ${items.map(it => it.label).join(' ; ')}\n`;
+      });
+      evalEtab += `\n`;
+    }
+
+    if (cdp.etatGlobal) evalEtab += `État global : ${cdp.etatGlobal}.\n`;
+    if (cdp.fonctionnalite) evalEtab += `Fonctionnalité : ${cdp.fonctionnalite}.\n`;
+    if (cdp.observations) evalEtab += `Observations : ${cdp.observations}\n`;
+    if (cdp.recommandations) evalEtab += `Recommandations : ${cdp.recommandations}\n`;
+    evalEtab += `\nAppréciation générale : ${appreciation}.\n\n`;
+  });
+  parts.push(evalEtab);
+
+  // ════════════════════════════════════════════════════════════════════
+  // VI. ÉVALUATION COGES
+  // ════════════════════════════════════════════════════════════════════
+  let cogesText = `VI. ÉVALUATION DES COMITÉS DE GESTION DES ÉTABLISSEMENTS SCOLAIRES (COGES)\n\n`;
+  const cogesEvaluated = cdpAnalysis.filter(c => c.coges.existe !== undefined && (c.coges.bilan || c.coges.reco || c.coges.fonctionnel));
+  const totalEval = cogesEvaluated.length;
+
+  if (totalEval === 0) {
+    cogesText += `L'évaluation des COGES n'a pas été renseignée pour les établissements visités. Cette dimension constitue pourtant un volet essentiel de la mission et devra faire l'objet d'un complément d'évaluation par la DAP-COGES.`;
+  } else {
+    cogesText += `L'évaluation des COGES constitue un volet essentiel de la mission, conduite sous la responsabilité de la DAP-COGES. Sur les ${totalEval} établissement${totalEval>1?'s ayant fait l\'objet d\'une évaluation':' évalué'}, ${cogesFonctList.length} COGES ${cogesFonctList.length>1?'sont fonctionnels':'est fonctionnel'} au moment de la mission.\n\n`;
+
+    cogesText += `Récapitulatif établissement par établissement :\n\n`;
+    cogesEvaluated.forEach(cdp => {
+      const c = cdp.coges;
+      cogesText += `- ${cdp.college} : COGES ${c.existe ? 'constitué' : 'non constitué'}, ${c.fonctionnel ? 'fonctionnel' : 'non fonctionnel'}, actions de sensibilisation ${c.sensib ? 'menées' : 'insuffisantes'}.`;
+      if (c.bilan) cogesText += ` Bilan exprimé : ${c.bilan.trim()}.`;
+      if (c.fonctionRepondant) cogesText += ` (Répondant : ${c.fonctionRepondant.trim()})`;
+      if (c.reco) cogesText += `\n  Recommandation locale : ${c.reco.trim()}`;
+      cogesText += `\n`;
+    });
+    cogesText += `\n`;
+
+    if (cogesNonFonctList.length > 0) {
+      cogesText += `Dans les ${cogesNonFonctList.length} établissement${cogesNonFonctList.length>1?'s':''} où le COGES est constitué mais non fonctionnel (${cogesNonFonctList.map(c=>c.college).join(', ')}), le principal facteur identifié est la faiblesse des actions de sensibilisation auprès des parents d'élèves et de la communauté locale, combinée à un déficit de suivi institutionnel. Ces constats appellent un appui structuré de la DAP-COGES, notamment des sessions de renforcement des capacités portant sur la gouvernance financière des COGES, la mobilisation communautaire et les mécanismes d'entretien et de maintenance des infrastructures. Sans un COGES actif, la pérennité des investissements réalisés est compromise.\n\n`;
+    }
   }
-  const obs = f.etabs.map(e => e.observations).filter(x => x && x.trim());
-  const reco = f.etabs.map(e => e.recommandations).filter(x => x && x.trim());
+  parts.push(cogesText);
 
-  let conclusion = `VI. CONCLUSION ET RECOMMANDATIONS OPÉRATIONNELLES
+  // ════════════════════════════════════════════════════════════════════
+  // VII. ÉVALUATION DESPS — EFFECTIFS ET ENJEUX ADMINISTRATIFS
+  // ════════════════════════════════════════════════════════════════════
+  let despsText = `VII. ÉVALUATION DESPS — EFFECTIFS ET ENJEUX ADMINISTRATIFS\n\n`;
+  const despsLines = [];
+  cdpAnalysis.forEach(cdp => {
+    const d = cdp.desps;
+    const line = [];
+    if (d.arrete.description) line.push(`Arrêté d'ouverture : ${d.arrete.description.trim()}`);
+    if (d.effectif.description) line.push(`Effectif : ${d.effectif.description.trim()}`);
+    if (d.reseau.reponse === 'OUI') line.push(`Connexion internet/réseau opérationnel`);
+    else if (d.reseau.reponse === 'NON') line.push(`Connexion internet/réseau défaillant${d.reseau.description ? ' : ' + d.reseau.description.trim() : ''}`);
+    if (d.immatric.description) line.push(`Immatriculation : ${d.immatric.description.trim()}`);
+    if (d.corrections.description) line.push(`Corrections d'identité/date de naissance : ${d.corrections.description.trim()}`);
+    if (d.denom.reponse) line.push(`Demande de dénomination ${d.denom.reponse === 'OUI' ? 'en cours' : 'non sollicitée'}${d.denom.description ? ' : ' + d.denom.description.trim() : ''}`);
+    if (line.length) despsLines.push({ college: cdp.college, info: line });
+  });
 
-La mission conjointe inter-directions a permis d'établir un diagnostic technique exhaustif des ${nbEtabs} établissement${nbEtabs>1?'s':''} visité${nbEtabs>1?'s':''} dans le cadre du programme de construction des Collèges de Proximité de la région de ${drena}.${etatLine}
+  if (despsLines.length === 0) {
+    despsText += `Les données administratives DESPS (arrêtés d'ouverture, effectifs, immatriculations, corrections d'identité, demandes de dénomination) n'ont pas été renseignées pour les établissements visités. Un complément d'évaluation est requis par la DESPS.`;
+  } else {
+    despsText += `7.1 Synthèse par établissement\n\n`;
+    despsLines.forEach(d => {
+      despsText += `- ${d.college} :\n  ${d.info.join('.\n  ')}.\n\n`;
+    });
 
-${totalReserves === 0
-  ? `Aucune réserve n'ayant été notifiée, la réception définitive des établissements peut être engagée selon le calendrier prévu.`
-  : `Les ${totalReserves} réserve${totalReserves>1?'s notifiées appellent':' notifiée appelle'} une action diligente de l'entreprise constructrice, sous la supervision conjointe de la DCEP et des directions partenaires concernées. La levée effective des réserves conditionne la réception définitive.`}`;
-
-  if (obs.length) {
-    conclusion += `\n\nObservations complémentaires des enquêteurs :\n${obs.map(o => '• ' + o.trim()).join('\n')}`;
+    despsText += `7.2 Enjeux administratifs identifiés\n\n`;
+    despsText += `Les principaux enjeux administratifs relevés portent sur :\n\n`;
+    despsText += `- Les arrêtés d'ouverture et codes administratifs : leur validité conditionne le pilotage statistique et les opérations d'affectation des élèves.\n`;
+    despsText += `- Les effectifs élèves : l'écart éventuel entre l'effectif réel et l'effectif remonté sur la plateforme DESPS doit être ajusté pour assurer la fiabilité des indicateurs nationaux.\n`;
+    despsText += `- Les immatriculations : les élèves ne disposant pas d'identifiants définitifs (notamment ceux affectés sans extrait de naissance valide) doivent faire l'objet de campagnes de régularisation coordonnées avec les mairies et services d'état civil.\n`;
+    despsText += `- Les corrections d'identité et de date de naissance : leur volume traduit la qualité des inscriptions et nécessite un dispositif structuré de validation préalable.\n`;
+    despsText += `- Les demandes de dénomination : leur traitement diligent par les services centraux conditionne l'inscription pérenne des établissements dans la carte scolaire.\n`;
   }
-  if (reco.length) {
-    conclusion += `\n\nRecommandations opérationnelles :\n${reco.map(r => '• ' + r.trim()).join('\n')}`;
+  parts.push(despsText);
+
+  // ════════════════════════════════════════════════════════════════════
+  // VIII. RECOMMANDATIONS GÉNÉRALES
+  // ════════════════════════════════════════════════════════════════════
+  let recoText = `VIII. RECOMMANDATIONS GÉNÉRALES DE LA MISSION\n\n`;
+
+  recoText += `8.1 Mesures urgentes à caractère critique\n\n`;
+  const critiques = cdpAnalysis.filter(c => c.nIssues >= 8);
+  if (critiques.length) {
+    recoText += `Les ${critiques.length} établissement${critiques.length>1?'s':''} suivant${critiques.length>1?'s':''} ${critiques.length>1?'présentent':'présente'} un nombre de non-conformités élevé (≥ 8) et requièrent une intervention prioritaire : ${critiques.map(c => c.college).join(', ')}. La levée des réserves majeures doit être engagée sans délai par les entreprises constructrices.\n\n`;
+  } else {
+    recoText += `Aucun établissement ne présente un nombre critique de non-conformités (≥ 8). Les réserves identifiées peuvent être levées dans le cadre du calendrier contractuel standard.\n\n`;
   }
-  conclusion += `\n\nRapport établi sous la responsabilité de ${enq} (rapport n° ${numR}) le ${dateStr}, à l'attention de la hiérarchie du MENAET.`;
+
+  recoText += `8.2 Mesures structurelles et organisationnelles\n\n`;
+  recoText += `- Levée systématique des réserves contractuelles auprès des entreprises titulaires des marchés de travaux et d'équipements, dans les délais réglementaires.\n`;
+  recoText += `- Renforcement de la maintenance préventive des infrastructures par les COGES et les services techniques de la DRENAET.\n`;
+  recoText += `- Activation et accompagnement des COGES non fonctionnels par la DAP-COGES, avec un calendrier précis de redynamisation.\n`;
+  recoText += `- Régularisation des situations administratives (immatriculations, dénominations) sous la coordination de la DESPS.\n`;
+  recoText += `- Suivi rapproché de l'occupation et des effectifs des CDP sous-fréquentés, en lien avec la DRENAET et les autorités locales.\n\n`;
+
+  // Inclure recommandations terrain saisies
+  const recsTerrain = cdpAnalysis.map(c => c.recommandations).filter(r => r && r.trim());
+  if (recsTerrain.length) {
+    recoText += `8.3 Recommandations spécifiques formulées sur le terrain\n\n`;
+    recsTerrain.forEach((r, i) => {
+      const cdp = cdpAnalysis[i];
+      recoText += `- [${cdp?.college || 'Établissement ' + (i+1)}] ${r.trim()}\n`;
+    });
+    recoText += `\n`;
+  }
+  parts.push(recoText);
+
+  // ════════════════════════════════════════════════════════════════════
+  // IX. CONCLUSION
+  // ════════════════════════════════════════════════════════════════════
+  let conclusion = `IX. CONCLUSION\n\nLa mission conjointe inter-directions conduite le ${dateStr} dans la DRENAET de ${drena} a permis d'établir un diagnostic technique exhaustif des ${nbEtabs} Collège${nbEtabs>1?'s':''} de Proximité visité${nbEtabs>1?'s':''}. Au total, ${totalIssues} non-conformité${totalIssues>1?'s ont':' a'} été relevée${totalIssues>1?'s':''} sur ${totalPoints} points de contrôle, soit un taux global de non-conformité de ${tauxNC} %.\n\n`;
+
+  if (totalIssues === 0) {
+    conclusion += `Aucune réserve majeure n'ayant été notifiée, la réception définitive des établissements peut être engagée selon le calendrier prévu, sous réserve de la validation hiérarchique habituelle.`;
+  } else {
+    conclusion += `Les réserves identifiées appellent une action diligente des entreprises constructrices et des directions partenaires concernées. La levée effective de l'ensemble des réserves contractuelles conditionne la réception définitive des ouvrages et la pleine entrée en exploitation des établissements. Une mission de contrôle de la levée des réserves devra être planifiée à l'issue des délais de régularisation impartis.\n\n`;
+    conclusion += `Au-delà du volet strictement contractuel, la mission souligne l'importance d'un engagement coordonné des six directions techniques mobilisées (DCEP, DESPS, DAF, DAP-COGES, SGP, DRH) pour garantir la pérennité des investissements réalisés et la qualité du service éducatif rendu aux élèves bénéficiaires.`;
+  }
+
+  conclusion += `\n\nRapport établi sous la responsabilité de ${enq} (rapport n° ${numR}) le ${dateStr}, à l'attention de la hiérarchie du MENAET et des entreprises titulaires des marchés concernés.`;
   parts.push(conclusion);
+
+  // ════════════════════════════════════════════════════════════════════
+  // ANNEXE — RÉCAPITULATIF PAR ÉTABLISSEMENT
+  // ════════════════════════════════════════════════════════════════════
+  let annexe = `ANNEXE. RÉCAPITULATIF PAR ÉTABLISSEMENT\n\n`;
+  cdpAnalysis.forEach((cdp, i) => {
+    annexe += `${i+1}. ${cdp.college}\n`;
+    annexe += `   Chef : ${cdp.chef}\n`;
+    annexe += `   Localité : ${cdp.localite}\n`;
+    annexe += `   Entreprise : ${cdp.entreprise}\n`;
+    annexe += `   Non-conformités : ${cdp.nIssues}/${cdp.totalPts}\n`;
+    annexe += `   Réserves manuelles ajoutées : ${cdp.nManualReserves}\n`;
+    annexe += `   Documents SGP scannés : ${cdp.sgpDocs.length}\n`;
+    annexe += `   COGES : ${cdp.coges.fonctionnel ? 'fonctionnel' : (cdp.coges.existe ? 'non fonctionnel' : 'non évalué')}\n\n`;
+  });
+  parts.push(annexe);
+
+  // ════════════════════════════════════════════════════════════════════
+  // ANNEXE SGP — DOCUMENTS PATRIMONIAUX SCANNÉS (transcriptions)
+  // ════════════════════════════════════════════════════════════════════
+  const allSgpDocs = cdpAnalysis.filter(c => c.sgpDocs.length > 0);
+  if (allSgpDocs.length > 0) {
+    let sgpAnnex = `ANNEXE SGP. DOCUMENTS PATRIMONIAUX SCANNÉS\n\n`;
+    sgpAnnex += `Cette annexe consigne les documents officiels du patrimoine photographiés sur le terrain par les enquêteurs de la SGP (Service de Gestion du Patrimoine). Les images photographiques sont jointes au présent rapport ; les informations transcrites manuellement à partir des documents sont reproduites ci-dessous.\n\n`;
+    allSgpDocs.forEach(cdp => {
+      sgpAnnex += `Établissement : ${cdp.college}\n`;
+      sgpAnnex += `Chef d'établissement : ${cdp.chef}\n`;
+      sgpAnnex += `${'─'.repeat(50)}\n\n`;
+      cdp.sgpDocs.forEach((doc, di) => {
+        sgpAnnex += `Document ${di+1} : ${doc.label || '(libellé non renseigné)'}\n`;
+        if (doc.transcription && doc.transcription.trim()) {
+          sgpAnnex += `Transcription / Notes : ${doc.transcription.trim()}\n`;
+        } else {
+          sgpAnnex += `Transcription : (aucune transcription saisie — voir image en annexe photographique)\n`;
+        }
+        if (doc.addedAt) sgpAnnex += `Date d'acquisition : ${new Date(doc.addedAt).toLocaleString('fr-FR')}\n`;
+        sgpAnnex += `\n`;
+      });
+    });
+    parts.push(sgpAnnex);
+  }
 
   return parts.join('\n\n');
 }
 
 async function downloadAiReportDocx() {
   if (!state.currentFiche || !state.currentFiche.aiReport) return;
-  if (!window.docx) return toast('Bibliothèque docx non chargée', 'error');
-  const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
+  try { await window.ensureLib('docx'); } catch(e) { return; }
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, BorderStyle } = docx;
   const f = state.currentFiche;
-  const paragraphs = [
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'RAPPORT DE VISITE TECHNIQUE — CDP', bold: true, size: 32, font: 'Arial', color: '1F3864' })],
-      spacing: { after: 200 },
-    }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH — MENAET', italics: true, size: 20, font: 'Arial', color: '666666' })],
-      spacing: { after: 200 },
-    }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'République de Côte d\'Ivoire', italics: true, size: 18, font: 'Arial', color: '888888' })],
-      spacing: { after: 400 },
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: `N° Rapport : ${f.numRapport || '—'}    ·    Date : ${fmtDate(f.dateVisite)}    ·    DRENAET : ${f.drena || '—'}`, size: 20, font: 'Arial' })],
-      spacing: { after: 300 },
-    }),
-  ];
-  f.aiReport.split(/\n\n+/).forEach(p => {
-    const txt = p.trim();
-    if (!txt) return;
-    // Détection des titres de section (commencent par I., II., etc.)
-    const isHeading = /^(I{1,3}V?I*|VI|V|IV|III|II|I)\.\s+[A-ZÉÈÊÀ]/.test(txt);
-    if (isHeading) {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: txt.split('\n')[0], bold: true, size: 26, font: 'Arial', color: '1F3864' })],
-        spacing: { before: 300, after: 200 },
-      }));
-      // Reste du paragraphe (après le titre)
-      const rest = txt.split('\n').slice(1).join('\n').trim();
-      if (rest) {
+  const paragraphs = [];
+
+  // Helper : détecte le type de bloc et le rend en conséquence
+  const isMainSection = (line) => /^(I{1,3}V?I*|IX|VIII|VII|VI|V|IV|III|II|I|ANNEXE)\.\s+[A-ZÉÈÊÀ]/.test(line);
+  const isSubSection = (line) => /^\d+\.\d+\s+[A-ZÉÈÊÀa-zéè]/.test(line);
+  const isDecorLine = (line) => /^[═─━─=─]{10,}/.test(line) || line.trim() === 'SOMMAIRE';
+  const isBullet = (line) => /^\s*-\s+/.test(line);
+
+  const blocks = f.aiReport.split(/\n\n+/);
+  blocks.forEach((blockRaw, blockIdx) => {
+    const block = blockRaw.trim();
+    if (!block) return;
+    const lines = block.split('\n');
+    const firstLine = lines[0].trim();
+
+    // ─── PAGE DE GARDE (premier bloc) ───
+    if (blockIdx === 0 && /MINISTÈRE/i.test(firstLine)) {
+      // Lignes ministère en haut, centrées
+      lines.forEach(l => {
+        const t = l.trim();
+        if (!t) { paragraphs.push(new Paragraph({ children: [new TextRun('')] })); return; }
+        if (isDecorLine(t)) {
+          paragraphs.push(new Paragraph({
+            border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: 'C9913A', space: 4 } },
+            children: [new TextRun('')]
+          }));
+          return;
+        }
+        const isTitle = /RAPPORT GÉNÉRAL DE MISSION/i.test(t);
+        const isSubTitle = /Mission conjointe et contradictoire|post-réception provisoire/i.test(t);
+        const isMinistere = /MINISTÈRE|DIRECTION DE/i.test(t);
         paragraphs.push(new Paragraph({
-          children: [new TextRun({ text: rest, size: 22, font: 'Arial' })],
-          spacing: { after: 200, line: 320 },
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({
+            text: t,
+            bold: isTitle || isMinistere,
+            size: isTitle ? 32 : (isMinistere ? 22 : 20),
+            font: 'Arial',
+            color: isTitle ? 'C9913A' : (isMinistere ? '1F3864' : '333333'),
+          })],
+          spacing: { after: isTitle ? 240 : 120 },
+        }));
+      });
+      paragraphs.push(new Paragraph({ children: [new TextRun('')], pageBreakBefore: false }));
+      paragraphs.push(new Paragraph({ children: [new PageBreak()] }));
+      return;
+    }
+
+    // ─── SOMMAIRE ───
+    if (firstLine === 'SOMMAIRE') {
+      paragraphs.push(new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'SOMMAIRE', bold: true, size: 30, font: 'Arial', color: '1F3864' })],
+        spacing: { before: 240, after: 360 },
+      }));
+      lines.slice(1).forEach(l => {
+        const t = l.trim();
+        if (!t) return;
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: t, size: 22, font: 'Arial' })],
+          spacing: { after: 100, line: 280 },
+          indent: { left: 720 },
+        }));
+      });
+      paragraphs.push(new Paragraph({ children: [new PageBreak()] }));
+      return;
+    }
+
+    // ─── SECTION PRINCIPALE (I. à IX. ou ANNEXE.) ───
+    if (isMainSection(firstLine)) {
+      // Saut de page avant chaque nouvelle section (sauf la première)
+      if (blockIdx > 2) paragraphs.push(new Paragraph({ children: [new PageBreak()] }));
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ text: firstLine, bold: true, size: 28, font: 'Arial', color: '1F3864' })],
+        spacing: { before: 240, after: 200 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'C9913A', space: 4 } },
+      }));
+      // Reste : peut contenir sous-titres et paragraphes
+      lines.slice(1).forEach(l => {
+        const t = l.trim();
+        if (!t) return;
+        if (isSubSection(t)) {
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: t, bold: true, size: 24, font: 'Arial', color: '2E4B7B' })],
+            spacing: { before: 180, after: 120 },
+          }));
+        } else if (isBullet(t)) {
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: t.replace(/^\s*-\s+/, '• '), size: 22, font: 'Arial' })],
+            spacing: { after: 80, line: 300 },
+            indent: { left: 360 },
+            alignment: AlignmentType.LEFT,
+          }));
+        } else {
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: t, size: 22, font: 'Arial' })],
+            spacing: { after: 140, line: 320 },
+            alignment: AlignmentType.JUSTIFIED,
+          }));
+        }
+      });
+      return;
+    }
+
+    // ─── BLOC ORDINAIRE : sous-section ou paragraphe ───
+    lines.forEach(l => {
+      const t = l.trim();
+      if (!t) return;
+      if (isSubSection(t)) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: t, bold: true, size: 24, font: 'Arial', color: '2E4B7B' })],
+          spacing: { before: 200, after: 120 },
+        }));
+      } else if (isBullet(t)) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: t.replace(/^\s*-\s+/, '• '), size: 22, font: 'Arial' })],
+          spacing: { after: 80, line: 300 },
+          indent: { left: 360 },
+        }));
+      } else if (isDecorLine(t)) {
+        // ignore décorations
+      } else {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: t, size: 22, font: 'Arial' })],
+          spacing: { after: 140, line: 320 },
           alignment: AlignmentType.JUSTIFIED,
         }));
       }
-    } else {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: txt, size: 22, font: 'Arial' })],
-        spacing: { after: 200, line: 320 },
-        alignment: AlignmentType.JUSTIFIED,
-      }));
-    }
+    });
   });
-  const doc = new Document({ sections: [{ children: paragraphs }] });
+
+  // ─── ANNEXE PHOTOGRAPHIQUE SGP : intégrer les images des documents scannés ───
+  const ImageRunCls = docx.ImageRun;
+  const sgpDocsAll = [];
+  (f.etabs || []).forEach(e => {
+    (e.sgpDocs || []).forEach(d => {
+      if (d.dataUrl) sgpDocsAll.push({ college: e.college || '—', ...d });
+    });
+  });
+  if (sgpDocsAll.length > 0 && ImageRunCls) {
+    // Saut de page + titre annexe
+    paragraphs.push(new Paragraph({ children: [new PageBreak()] }));
+    paragraphs.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: 'ANNEXE PHOTOGRAPHIQUE SGP', bold: true, size: 30, font: 'Arial', color: 'DC2626' })],
+      spacing: { before: 240, after: 200 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'DC2626', space: 4 } },
+    }));
+    paragraphs.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: 'Documents patrimoniaux scannés sur le terrain', italics: true, size: 20, font: 'Arial', color: '666666' })],
+      spacing: { after: 360 },
+    }));
+
+    // Grouper par établissement
+    const byCollege = {};
+    sgpDocsAll.forEach(d => { if (!byCollege[d.college]) byCollege[d.college] = []; byCollege[d.college].push(d); });
+    for (const [college, docs] of Object.entries(byCollege)) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ text: `🏫 ${college}`, bold: true, size: 26, font: 'Arial', color: '1F3864' })],
+        spacing: { before: 280, after: 160 },
+      }));
+      docs.forEach((d, di) => {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: `Document ${di+1} — ${d.label || '(libellé non renseigné)'}`, bold: true, size: 22, font: 'Arial', color: 'DC2626' })],
+          spacing: { before: 180, after: 100 },
+        }));
+        try {
+          const base64 = d.dataUrl.split(',')[1];
+          const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+          paragraphs.push(new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 100 },
+            children: [new ImageRunCls({ data: bytes, transformation: { width: 380, height: 280 } })],
+          }));
+        } catch(err) {
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: '(image non insérable)', italics: true, size: 18, color: '999999' })],
+          }));
+        }
+        if (d.transcription && d.transcription.trim()) {
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: 'Transcription : ', bold: true, size: 20, font: 'Arial' }),
+                       new TextRun({ text: d.transcription.trim(), size: 20, font: 'Arial', italics: true })],
+            spacing: { after: 160, line: 300 },
+            alignment: AlignmentType.JUSTIFIED,
+          }));
+        }
+      });
+    }
+  }
+
+  const doc = new Document({
+    styles: { default: { document: { run: { font: 'Arial', size: 22 } } } },
+    sections: [{
+      properties: { page: { margin: { top: 1200, right: 1200, bottom: 1200, left: 1200 } } },
+      children: paragraphs
+    }]
+  });
   const buf = await Packer.toBuffer(doc);
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
   const url = URL.createObjectURL(blob);
@@ -4341,15 +5084,10 @@ async function downloadAiReportDocx() {
   toast('Word téléchargé', 'success');
 }
 
-// Export PDF via jsPDF (chargé en CDN)
+// Export PDF via jsPDF (chargé en CDN à la demande si absent)
 async function downloadAiReportPdf() {
   if (!state.currentFiche || !state.currentFiche.aiReport) return;
-  if (!window.jspdf) {
-    // Charger jsPDF dynamiquement si absent
-    toast('Chargement de la bibliothèque PDF…', 'success');
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-  }
-  if (!window.jspdf) return toast('Impossible de charger jsPDF', 'error');
+  try { await window.ensureLib('jspdf'); } catch(e) { return; }
   const { jsPDF } = window.jspdf;
   const f = state.currentFiche;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -4357,69 +5095,223 @@ async function downloadAiReportPdf() {
   const margin = 18, pageWidth = 210, pageHeight = 297, usable = pageWidth - 2*margin;
   let y = margin;
 
-  // En-tête
+  // Helpers détection
+  const isMainSection = (line) => /^(I{1,3}V?I*|IX|VIII|VII|VI|V|IV|III|II|I|ANNEXE)\.\s+[A-ZÉÈÊÀ]/.test(line);
+  const isSubSection = (line) => /^\d+\.\d+\s+[A-ZÉÈÊÀa-zéè]/.test(line);
+  const isDecorLine = (line) => /^[═─━─=─]{10,}/.test(line);
+  const isBullet = (line) => /^\s*-\s+/.test(line);
+  const checkPageBreak = (need = 8) => { if (y > pageHeight - need - 14) { doc.addPage(); y = margin; } };
+
+  // ─── Page de garde stylisée ───
   doc.setFillColor(31, 56, 100);
-  doc.rect(0, 0, pageWidth, 30, 'F');
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold').setFontSize(14);
-  doc.text('RAPPORT DE VISITE TECHNIQUE — CDP', pageWidth/2, 12, { align: 'center' });
-  doc.setFont('helvetica', 'italic').setFontSize(9);
-  doc.text('Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', pageWidth/2, 18, { align: 'center' });
-  doc.text('MENAET — République de Côte d\'Ivoire', pageWidth/2, 23, { align: 'center' });
-  y = 38;
+  doc.setFont('helvetica', 'bold').setFontSize(11);
+  doc.text('MINISTÈRE DE L\'ÉDUCATION NATIONALE,', pageWidth/2, 35, { align: 'center' });
+  doc.text('DE L\'ALPHABÉTISATION ET DE L\'ENSEIGNEMENT TECHNIQUE', pageWidth/2, 41, { align: 'center' });
+  doc.setFontSize(10).setFont('helvetica', 'normal');
+  doc.text('Direction de la Coordination et de l\'Exécution des Projets (DCEP)', pageWidth/2, 48, { align: 'center' });
+  // Filet doré
+  doc.setDrawColor(201, 145, 58).setLineWidth(0.8);
+  doc.line(margin + 30, 56, pageWidth - margin - 30, 56);
+  // Titre principal
+  doc.setTextColor(201, 145, 58).setFont('helvetica', 'bold').setFontSize(20);
+  doc.text('RAPPORT GÉNÉRAL', pageWidth/2, 90, { align: 'center' });
+  doc.text('DE MISSION', pageWidth/2, 102, { align: 'center' });
+  doc.setTextColor(255, 255, 255).setFontSize(13).setFont('helvetica', 'italic');
+  doc.text('Mission conjointe et contradictoire', pageWidth/2, 118, { align: 'center' });
+  doc.text('de visite technique post-réception provisoire', pageWidth/2, 126, { align: 'center' });
+  doc.text('des Collèges de Proximité (CDP)', pageWidth/2, 134, { align: 'center' });
+  doc.line(margin + 50, 145, pageWidth - margin - 50, 145);
+  doc.setFontSize(11).setFont('helvetica', 'normal');
+  doc.text(`DRENAET de ${f.drena || 'San Pédro'}`, pageWidth/2, 158, { align: 'center' });
+  doc.text(fmtDate(f.dateVisite), pageWidth/2, 165, { align: 'center' });
+  // Footer page de garde
+  doc.setFontSize(9).setFont('helvetica', 'italic');
+  doc.text(`Rapport n° ${f.numRapport || '—'}`, pageWidth/2, 240, { align: 'center' });
+  doc.text(`Coordonnateur : ${f.nomEnqueteur || '—'}`, pageWidth/2, 247, { align: 'center' });
+  doc.text('République de Côte d\'Ivoire — MENAET', pageWidth/2, 270, { align: 'center' });
 
-  // Métadonnées
-  doc.setTextColor(0, 0, 0).setFont('helvetica', 'normal').setFontSize(10);
-  doc.text(`N° Rapport : ${f.numRapport || '—'}   ·   Date : ${fmtDate(f.dateVisite)}   ·   DRENAET : ${f.drena || '—'}`, margin, y);
-  y += 6;
-  doc.setDrawColor(31, 56, 100).setLineWidth(0.4);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 6;
+  // Nouvelle page pour le contenu
+  doc.addPage();
+  y = margin + 4;
 
-  // Corps : itérer paragraphes
-  const text = f.aiReport;
-  const blocks = text.split(/\n\n+/);
-  blocks.forEach(block => {
-    const txt = block.trim();
-    if (!txt) return;
-    const lines = txt.split('\n');
-    const firstLine = lines[0];
-    const isHeading = /^(I{1,3}V?I*|VI|V|IV|III|II|I)\.\s+[A-ZÉÈÊÀ]/.test(firstLine);
+  // En-tête de page (sera répété par addPage)
+  const drawTopBand = () => {
+    doc.setFillColor(31, 56, 100);
+    doc.rect(0, 0, pageWidth, 14, 'F');
+    doc.setTextColor(255, 255, 255).setFont('helvetica', 'bold').setFontSize(9);
+    doc.text('RAPPORT DE MISSION CDP — MENAET', margin, 9);
+    doc.setFont('helvetica', 'italic').setFontSize(8);
+    doc.text(`N° ${f.numRapport || '—'} · ${fmtDate(f.dateVisite)}`, pageWidth - margin, 9, { align: 'right' });
+    doc.setDrawColor(201, 145, 58).setLineWidth(0.5);
+    doc.line(0, 14, pageWidth, 14);
+    doc.setTextColor(0, 0, 0);
+  };
+  drawTopBand();
+  y = 22;
 
-    if (isHeading) {
-      if (y > pageHeight - 30) { doc.addPage(); y = margin; }
-      doc.setFont('helvetica', 'bold').setFontSize(12).setTextColor(31, 56, 100);
-      doc.text(firstLine, margin, y);
-      y += 7;
-      const rest = lines.slice(1).join('\n').trim();
-      if (rest) {
-        doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
-        const wrapped = doc.splitTextToSize(rest, usable);
-        wrapped.forEach(line => {
-          if (y > pageHeight - 20) { doc.addPage(); y = margin; }
-          doc.text(line, margin, y);
-          y += 5;
-        });
-        y += 3;
-      }
-    } else {
-      doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
-      const wrapped = doc.splitTextToSize(txt, usable);
-      wrapped.forEach(line => {
-        if (y > pageHeight - 20) { doc.addPage(); y = margin; }
-        doc.text(line, margin, y);
-        y += 5;
+  // Contenu narratif
+  const blocks = f.aiReport.split(/\n\n+/);
+  blocks.forEach((blockRaw, blockIdx) => {
+    if (blockIdx === 0) return; // page de garde déjà rendue
+
+    const block = blockRaw.trim();
+    if (!block) return;
+    const lines = block.split('\n');
+    const firstLine = lines[0].trim();
+
+    // SOMMAIRE
+    if (firstLine === 'SOMMAIRE') {
+      doc.addPage(); drawTopBand(); y = 26;
+      doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(31, 56, 100);
+      doc.text('SOMMAIRE', pageWidth/2, y, { align: 'center' });
+      y += 14;
+      doc.setFont('helvetica', 'normal').setFontSize(11).setTextColor(0, 0, 0);
+      lines.slice(1).forEach(l => {
+        const t = l.trim();
+        if (!t) return;
+        checkPageBreak();
+        doc.text(t, margin + 5, y);
+        y += 7;
       });
-      y += 3;
+      return;
     }
+
+    // SECTION PRINCIPALE
+    if (isMainSection(firstLine)) {
+      doc.addPage(); drawTopBand(); y = 24;
+      doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(31, 56, 100);
+      const titleLines = doc.splitTextToSize(firstLine, usable);
+      titleLines.forEach(tl => { doc.text(tl, margin, y); y += 7; });
+      doc.setDrawColor(201, 145, 58).setLineWidth(0.6);
+      doc.line(margin, y, margin + 70, y);
+      y += 6;
+
+      lines.slice(1).forEach(l => {
+        const t = l.trim();
+        if (!t || isDecorLine(t)) return;
+        if (isSubSection(t)) {
+          checkPageBreak(12);
+          doc.setFont('helvetica', 'bold').setFontSize(11.5).setTextColor(46, 75, 123);
+          doc.text(t, margin, y);
+          y += 6;
+        } else if (isBullet(t)) {
+          doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+          const bulletText = '• ' + t.replace(/^\s*-\s+/, '');
+          const wrapped = doc.splitTextToSize(bulletText, usable - 6);
+          wrapped.forEach(line => {
+            checkPageBreak();
+            doc.text(line, margin + 4, y);
+            y += 4.8;
+          });
+          y += 1;
+        } else {
+          doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+          const wrapped = doc.splitTextToSize(t, usable);
+          wrapped.forEach(line => {
+            checkPageBreak();
+            doc.text(line, margin, y);
+            y += 4.8;
+          });
+          y += 2;
+        }
+      });
+      return;
+    }
+
+    // Bloc ordinaire
+    lines.forEach(l => {
+      const t = l.trim();
+      if (!t || isDecorLine(t)) return;
+      if (isSubSection(t)) {
+        checkPageBreak(12);
+        doc.setFont('helvetica', 'bold').setFontSize(11.5).setTextColor(46, 75, 123);
+        doc.text(t, margin, y);
+        y += 6;
+      } else if (isBullet(t)) {
+        doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+        const bulletText = '• ' + t.replace(/^\s*-\s+/, '');
+        const wrapped = doc.splitTextToSize(bulletText, usable - 6);
+        wrapped.forEach(line => {
+          checkPageBreak();
+          doc.text(line, margin + 4, y);
+          y += 4.8;
+        });
+        y += 1;
+      } else {
+        doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+        const wrapped = doc.splitTextToSize(t, usable);
+        wrapped.forEach(line => {
+          checkPageBreak();
+          doc.text(line, margin, y);
+          y += 4.8;
+        });
+        y += 2;
+      }
+    });
   });
 
-  // Pied de page sur chaque page
+  // ─── ANNEXE PHOTOGRAPHIQUE SGP ───
+  const sgpDocsAll = [];
+  (f.etabs || []).forEach(e => {
+    (e.sgpDocs || []).forEach(d => { if (d.dataUrl) sgpDocsAll.push({ college: e.college || '—', ...d }); });
+  });
+  if (sgpDocsAll.length > 0) {
+    doc.addPage(); drawTopBand(); y = 26;
+    doc.setFont('helvetica', 'bold').setFontSize(16).setTextColor(220, 38, 38);
+    doc.text('ANNEXE PHOTOGRAPHIQUE SGP', pageWidth/2, y, { align: 'center' });
+    y += 8;
+    doc.setFont('helvetica', 'italic').setFontSize(10).setTextColor(120, 120, 120);
+    doc.text('Documents patrimoniaux scannés sur le terrain', pageWidth/2, y, { align: 'center' });
+    y += 10;
+
+    const byCollege = {};
+    sgpDocsAll.forEach(d => { if (!byCollege[d.college]) byCollege[d.college] = []; byCollege[d.college].push(d); });
+    for (const [college, docs] of Object.entries(byCollege)) {
+      if (y > pageHeight - 40) { doc.addPage(); drawTopBand(); y = 22; }
+      doc.setFont('helvetica', 'bold').setFontSize(12).setTextColor(31, 56, 100);
+      doc.text(`🏫 ${college}`, margin, y);
+      y += 8;
+      docs.forEach((d, di) => {
+        const imgH = 90;
+        if (y > pageHeight - imgH - 30) { doc.addPage(); drawTopBand(); y = 22; }
+        doc.setFont('helvetica', 'bold').setFontSize(10).setTextColor(220, 38, 38);
+        doc.text(`Doc ${di+1} : ${d.label || '(libellé non renseigné)'}`, margin, y);
+        y += 5;
+        try {
+          // Détection mime depuis dataUrl
+          const mimeMatch = (d.dataUrl || '').match(/^data:image\/(\w+);/);
+          const fmt = mimeMatch ? mimeMatch[1].toUpperCase().replace('JPG','JPEG') : 'JPEG';
+          const imgW = 120;
+          doc.addImage(d.dataUrl, fmt, margin, y, imgW, imgH);
+          y += imgH + 4;
+        } catch(err) {
+          doc.setFont('helvetica', 'italic').setFontSize(9).setTextColor(150, 150, 150);
+          doc.text('(image non insérable)', margin, y);
+          y += 5;
+        }
+        if (d.transcription && d.transcription.trim()) {
+          doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+          const wrapped = doc.splitTextToSize('Transcription : ' + d.transcription.trim(), usable);
+          wrapped.forEach(line => {
+            if (y > pageHeight - 20) { doc.addPage(); drawTopBand(); y = 22; }
+            doc.text(line, margin, y);
+            y += 4.8;
+          });
+          y += 3;
+        }
+        y += 4;
+      });
+    }
+  }
+
+  // Pied de page numéroté sur chaque page
   const total = doc.internal.getNumberOfPages();
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
     doc.setFontSize(8).setTextColor(150, 150, 150).setFont('helvetica', 'italic');
-    doc.text(`MENAET · Mission CDP San Pédro · Page ${i} / ${total}`, pageWidth/2, pageHeight - 8, { align: 'center' });
+    if (i > 1) doc.text(`MENAET · Mission CDP ${f.drena || 'San Pédro'} · Page ${i} / ${total}`, pageWidth/2, pageHeight - 8, { align: 'center' });
   }
 
   const fname = `Rapport_Auto_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.pdf`;
@@ -4428,22 +5320,69 @@ async function downloadAiReportPdf() {
 }
 
 // Helper pour charger un script CDN dynamiquement
-function loadScript(src) {
+// Helper pour charger un script CDN dynamiquement (accessible globalement)
+window.loadScript = function(src) {
   return new Promise((resolve, reject) => {
+    // Si déjà chargé, résoudre immédiatement
+    if (document.querySelector(`script[src="${src}"]`)) {
+      return resolve();
+    }
     const s = document.createElement('script');
     s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Échec du chargement de ' + src));
     document.head.appendChild(s);
   });
-}
+};
+
+// Charger une bibliothèque à la demande (avec cache et toast de progression)
+window.ensureLib = async function(name) {
+  const libs = {
+    docx: {
+      check: () => !!window.docx,
+      url: 'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js',
+      label: 'Bibliothèque Word',
+    },
+    xlsx: {
+      check: () => !!window.XLSX,
+      url: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+      label: 'Bibliothèque Excel',
+    },
+    jspdf: {
+      check: () => !!window.jspdf,
+      url: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+      label: 'Bibliothèque PDF',
+    },
+  };
+  const lib = libs[name];
+  if (!lib) throw new Error('Bibliothèque inconnue : ' + name);
+  if (lib.check()) return true;
+  // Pas encore chargée → toast info + chargement
+  if (typeof toast === 'function') toast(`Chargement ${lib.label} en cours…`, 'success');
+  try {
+    await window.loadScript(lib.url);
+    // Attendre un instant pour que le script s'initialise
+    let tries = 0;
+    while (!lib.check() && tries < 30) {
+      await new Promise(r => setTimeout(r, 100));
+      tries++;
+    }
+    if (!lib.check()) throw new Error(lib.label + ' chargée mais non initialisée');
+    return true;
+  } catch(e) {
+    if (typeof toast === 'function') toast(`Échec : ${lib.label} indisponible. Vérifiez votre connexion internet.`, 'error');
+    throw e;
+  }
+};
+
+function loadScript(src) { return window.loadScript(src); }
 </script>
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // WORD GENERATION — reprise fidèle de l'index.html original + photos
 // ═══════════════════════════════════════════════════════════════════
 async function generateReport() {
-  if (!window.docx) return toast('Bibliothèque docx non chargée', 'error');
+  try { await window.ensureLib('docx'); } catch(e) { return; }
   collectFicheFromUI();
   const f = state.currentFiche;
   if (!f) return;
@@ -4560,7 +5499,7 @@ async function generateReport() {
           blank(),
           p('RAPPORT DE VISITE TECHNIQUE PRÉALABLE', { bold: true, size: 30, color: WHITE, align: AlignmentType.CENTER }),
           p('À LA RÉCEPTION DÉFINITIVE DES COLLÈGES DE PROXIMITÉ (CDP)', { bold: true, size: 22, color: 'C8DDF5', align: AlignmentType.CENTER }),
-          p('Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', { bold: true, size: 18, color: GOLD, align: AlignmentType.CENTER }),
+          p('Mission conjointe DCEP · DESPS · DAF · DAP-COGES · SGP · DRH', { bold: true, size: 18, color: GOLD, align: AlignmentType.CENTER }),
           blank(),
           p(`Date : ${dateDisplay}   ·   N° Rapport : ${numRapport}   ·   DRENAET : ${drena}`, { size: 18, color: 'C8DDF5', align: AlignmentType.CENTER }),
           p(`Enquêteur / Coordonnateur : ${enqueteur}   ·   Statut : ${statutLbl}`, { size: 18, italic: true, color: 'C8DDF5', align: AlignmentType.CENTER }),
@@ -4924,7 +5863,7 @@ async function generateReport() {
                 p('Mission conjointe post-réception provisoire CDP — San Pédro 2026', { size: 14, italic: true, color: '666666' }),
               ], { borders: noBdrs() }),
               tc([
-                p('DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', { bold: true, size: 14, color: GOLD, align: AlignmentType.RIGHT }),
+                p('DCEP · DESPS · DAF · DAP-COGES · SGP · DRH', { bold: true, size: 14, color: GOLD, align: AlignmentType.RIGHT }),
                 p(`Rapport N° ${numRapport}  ·  ${dateDisplay}`, { size: 14, italic: true, color: '888888', align: AlignmentType.RIGHT }),
               ], { borders: noBdrs() }),
             ]})]
@@ -4966,6 +5905,15 @@ async function generateReport() {
 // ═══════════════════════════════════════════════════════════════════
 async function init() {
   loadFromLS();
+
+  // Préchargement en arrière-plan des bibliothèques d'export (non bloquant)
+  // Si elles sont déjà dans le HTML head, ensureLib retournera immédiatement.
+  // Sinon, elles seront chargées en tâche de fond pour être prêtes au clic.
+  setTimeout(() => {
+    ['docx', 'xlsx', 'jspdf'].forEach(name => {
+      try { window.ensureLib(name).catch(() => {}); } catch(e) {}
+    });
+  }, 1500);
 
   // Mode partage public (?fiche=ID)
   const params = new URLSearchParams(location.search);
