@@ -1803,13 +1803,14 @@ const COL = {
 // Console Firebase → Project Settings → Web SDK → Config
 // Les utilisateurs n'auront rien à coller : la config est chargée
 // automatiquement au 1er démarrage. Modifiable dans Paramètres ⚙️.
-const DEFAULT_FB_CONFIG = {
-  apiKey: "REMPLACER_PAR_VOTRE_API_KEY",
-  authDomain: "REMPLACER.firebaseapp.com",
-  projectId: "REMPLACER",
-  storageBucket: "REMPLACER.appspot.com",
-  messagingSenderId: "REMPLACER",
-  appId: "REMPLACER",
+const firebaseConfig = {
+  apiKey: "AIzaSyBXbU6ssWpaO-W5L6OLNbq-uhXw1_xuYYg",
+  authDomain: "fiche-de-visite-cdp.firebaseapp.com",
+  databaseURL: "https://fiche-de-visite-cdp-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "fiche-de-visite-cdp",
+  storageBucket: "fiche-de-visite-cdp.firebasestorage.app",
+  messagingSenderId: "367898193888",
+  appId: "1:367898193888:web:03396eebd94cddc787c585"
 };
 // Pour savoir si la config par défaut est "vraie" (sinon on ne tente pas de connexion auto)
 function isValidFbConfig(cfg) {
