@@ -17,6 +17,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
   :root {
@@ -843,6 +844,149 @@
     .gen-actions .btn-generate { flex: 1; justify-content: center; }
     .header-right { width: 100%; justify-content: space-between; }
   }
+
+  /* ═══ SCROLLBARS VISIBLES (Webkit + Firefox) ═══ */
+  /* Conteneurs principaux scrollables horizontalement et verticalement */
+  body,
+  .modal-content,
+  .tab-panel,
+  .card,
+  .card-body,
+  .constats-table,
+  .data-table,
+  .data-table-wrap,
+  .modal-body,
+  .ai-output,
+  .gallery-grid,
+  .sig-grid,
+  table {
+    scrollbar-width: thin;
+    scrollbar-color: var(--navy) var(--cream);
+  }
+  /* Scroll horizontal forcé sur les tableaux longs */
+  .constats-table,
+  .data-table {
+    overflow-x: auto;
+    overflow-y: visible;
+    max-width: 100%;
+  }
+  .modal-content {
+    max-height: 92vh;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  .ai-output {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  /* Webkit (Chrome, Edge, Safari, mobile WebView) */
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+    background: #F2EFE8;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F2EFE8;
+    border-radius: 8px;
+    border: 1px solid #E0DDD5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #2E4B7B 0%, #1B2D4A 100%);
+    border-radius: 8px;
+    border: 2px solid #F2EFE8;
+    min-height: 30px;
+    min-width: 30px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #C9913A 0%, #A87526 100%);
+  }
+  ::-webkit-scrollbar-corner {
+    background: #F2EFE8;
+  }
+  /* Scroll horizontal en bas de page : barre scroll body */
+  html, body {
+    overflow-x: auto;
+  }
+
+  /* ═══ CANVAS SIGNATURE ═══ */
+  .sig-canvas-wrap {
+    border: 2px dashed var(--navy);
+    border-radius: 8px;
+    background: repeating-linear-gradient(0deg, transparent, transparent 24px, #F2EFE8 24px, #F2EFE8 25px);
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sig-canvas {
+    display: block;
+    width: 100%;
+    height: 140px;
+    cursor: crosshair;
+    touch-action: none;
+    background: transparent;
+  }
+  .sig-canvas-actions {
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+  }
+  .sig-canvas-actions button {
+    padding: 4px 10px;
+    font-size: 11.5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .sig-canvas-actions button:hover { background: var(--cream); }
+  .sig-canvas-hint {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #999;
+    font-size: 12px;
+    font-style: italic;
+    pointer-events: none;
+    user-select: none;
+  }
+  .sig-canvas-wrap.has-signature .sig-canvas-hint { display: none; }
+
+  /* ═══ TOGGLE ŒIL MOT DE PASSE ═══ */
+  .pwd-wrap {
+    position: relative;
+    display: block;
+  }
+  .pwd-wrap input {
+    padding-right: 42px !important;
+    width: 100%;
+  }
+  .pwd-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    color: var(--grey);
+    line-height: 1;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .pwd-toggle:hover {
+    background: var(--cream);
+    color: var(--navy);
+  }
+  .pwd-toggle:focus {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+  }
 </style>
 </head>
 <body>
@@ -902,7 +1046,7 @@
   <div class="hero">
     <div class="hero-text">
       <h1>Fiche de Visite Technique Préalable<br>à la Réception Définitive des CDP</h1>
-      <p>Mission conjointe et contradictoire post-réception provisoire — Plateforme nationale de collecte et de suivi des constats techniques des Collèges de Proximité (DCEP / MENAET).</p>
+      <p>Mission conjointe post-réception provisoire — Région de San Pédro · Mai 2026 · 12 CDP à visiter<br>Plateforme nationale de collecte et de suivi des constats techniques des Collèges de Proximité (MENAET).</p>
     </div>
     <div class="hero-meta">
       <div class="meta-pill">
@@ -910,8 +1054,8 @@
         <span class="lbl">CDP au répertoire</span>
       </div>
       <div class="meta-pill">
-        <span class="num">13</span>
-        <span class="lbl">Constats vérifiés</span>
+        <span class="num">39</span>
+        <span class="lbl">Constats · 6 directions</span>
       </div>
       <div class="meta-pill">
         <span class="num" id="nbEtab">1</span>
@@ -1057,19 +1201,27 @@
 
   <!-- ──────────────────────────── TAB: CONSTATS ──────────────────────────── -->
   <div id="tab-constats" class="tab-panel">
+    <!-- Sous-onglets par direction -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-body" style="padding:14px 16px;">
+        <div style="font-size:11.5px;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px;">Questionnaire par direction</div>
+        <div id="dirSubTabs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-header">
-        <div class="card-icon">🔍</div>
+      <div class="card-header" id="dirConstatHeader">
+        <div class="card-icon" id="dirIcon">🔍</div>
         <div>
-          <div class="card-title">Constats des malfaçons et non-conformités</div>
+          <div class="card-title" id="dirTitle">Constats des malfaçons et non-conformités</div>
           <div class="card-subtitle">Pour chaque constat, indiquer OUI ou NON. Si OUI, décrire la malfaçon et joindre les photos.</div>
         </div>
       </div>
       <div class="card-body" style="padding: 0;">
         <div class="status-summary" style="padding: 16px 20px 0;">
-          <div class="status-badge badge-issue">🔴 <span id="countIssues">0</span> malfaçon(s) constatée(s)</div>
+          <div class="status-badge badge-issue">🔴 <span id="countIssues">0</span> malfaçon(s)</div>
           <div class="status-badge badge-ok">🟢 <span id="countOk">0</span> conforme(s)</div>
-          <div class="status-badge badge-pending">⚪ <span id="countPending">13</span> en attente</div>
+          <div class="status-badge badge-pending">⚪ <span id="countPending">39</span> en attente</div>
         </div>
         <table class="constats-table">
           <thead>
@@ -1090,7 +1242,7 @@
         <div class="card-icon">➕</div>
         <div>
           <div class="card-title">Autres constats observés</div>
-          <div class="card-subtitle">Malfaçons non listées ci-dessus</div>
+          <div class="card-subtitle">Malfaçons spécifiques non listées pour cette direction</div>
         </div>
       </div>
       <div class="card-body">
@@ -1150,13 +1302,23 @@
       <div class="card-header">
         <div class="card-icon">⚠️</div>
         <div>
-          <div class="card-title">Suivi des réserves contractuelles</div>
-          <div class="card-subtitle">Réserves à notifier formellement à l'entreprise</div>
+          <div class="card-title">Réserves contractuelles à notifier</div>
+          <div class="card-subtitle">Synthèse automatique des constats OUI + ajouts manuels</div>
         </div>
       </div>
       <div class="card-body">
-        <div id="reservesList"></div>
-        <button class="btn-add" onclick="addReserve()" style="margin-top:12px;">+ Ajouter une réserve</button>
+        <div class="ai-panel" style="background:linear-gradient(135deg,#FFF7ED 0%,#FED7AA 100%);border-color:var(--amber);margin-bottom:14px;">
+          <div class="ai-panel-title" style="color:var(--amber);">⚡ Génération automatique</div>
+          <div class="ai-panel-text">Les réserves ci-dessous sont automatiquement déduites des constats OUI saisis dans l'onglet Constats. Vous pouvez ajuster les délais, valider chaque réserve, et ajouter des réserves complémentaires manuelles.</div>
+        </div>
+
+        <div id="reservesAutoContainer"></div>
+
+        <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:18px;">
+          <div style="font-weight:600;font-size:14px;color:var(--navy);margin-bottom:10px;">📝 Réserves manuelles complémentaires</div>
+          <div id="reservesManualList"></div>
+          <button class="btn-add" onclick="addManualReserve()" style="margin-top:12px;">+ Ajouter une réserve manuelle</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1168,54 +1330,11 @@
         <div class="card-icon">✍️</div>
         <div>
           <div class="card-title">Signatures des parties</div>
-          <div class="card-subtitle">Les soussignés certifient l'exactitude des constats</div>
+          <div class="card-subtitle">Chaque représentant de direction signe sa section. L'entreprise et le chef d'établissement valident l'ensemble.</div>
         </div>
       </div>
       <div class="card-body">
-        <div class="sig-grid">
-          <div class="sig-box">
-            <div class="sig-box-header">Représentant DCEP / MENAET</div>
-            <div class="sig-box-body">
-              <div class="form-group">
-                <label>Nom & Prénom</label>
-                <input type="text" id="sig1Name" placeholder="Nom complet">
-              </div>
-              <div class="form-group">
-                <label>Fonction</label>
-                <input type="text" id="sig1Titre" placeholder="ex: Ingénieur DCEP">
-              </div>
-              <div class="sig-line">Signature :</div>
-            </div>
-          </div>
-          <div class="sig-box">
-            <div class="sig-box-header">Chef d'Établissement</div>
-            <div class="sig-box-body">
-              <div class="form-group">
-                <label>Nom & Prénom</label>
-                <input type="text" id="sig2Name" placeholder="Nom complet">
-              </div>
-              <div class="form-group">
-                <label>Établissement</label>
-                <input type="text" id="sig2Etab" placeholder="Nom du collège">
-              </div>
-              <div class="sig-line">Signature :</div>
-            </div>
-          </div>
-          <div class="sig-box">
-            <div class="sig-box-header">Représentant Entreprise</div>
-            <div class="sig-box-body">
-              <div class="form-group">
-                <label>Nom & Prénom</label>
-                <input type="text" id="sig3Name" placeholder="Nom complet">
-              </div>
-              <div class="form-group">
-                <label>Entreprise</label>
-                <input type="text" id="sig3Entreprise" placeholder="Raison sociale">
-              </div>
-              <div class="sig-line">Signature :</div>
-            </div>
-          </div>
-        </div>
+        <div id="signaturesGrid" class="sig-grid" style="grid-template-columns:1fr 1fr;"></div>
 
         <!-- Récapitulatif -->
         <div style="margin-top:24px;">
@@ -1228,14 +1347,15 @@
           </div>
         </div>
 
-        <!-- IA Génération rapport rédigé -->
+        <!-- IA Génération rapport rédigé (LOCAL, sans clé) -->
         <div style="margin-top:24px;">
           <div class="ai-panel">
-            <div class="ai-panel-title">🤖 Rapport rédigé par IA (Claude)</div>
-            <div class="ai-panel-text">Génère un rapport narratif professionnel basé sur les constats. Configurez votre clé Anthropic dans Paramètres ⚙️.</div>
+            <div class="ai-panel-title">📝 Générateur de rapport automatique</div>
+            <div class="ai-panel-text">Compose automatiquement un rapport narratif structuré à partir des constats de toutes les directions. Le rapport est généré localement et instantanément. Vous pouvez le télécharger en Word ou PDF.</div>
             <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-              <button class="btn btn-gold" onclick="generateAiReport()">🤖 Générer rapport IA</button>
-              <button class="btn" onclick="downloadAiReportDocx()" id="btnDlAi" style="display:none;">📥 Télécharger Word IA</button>
+              <button class="btn btn-gold" onclick="generateAiReport()">✨ Composer le rapport</button>
+              <button class="btn" onclick="downloadAiReportDocx()" id="btnDlAi" style="display:none;">📥 Word</button>
+              <button class="btn" onclick="downloadAiReportPdf()" id="btnDlAiPdf" style="display:none;">📄 PDF</button>
             </div>
             <div id="aiOutput" class="ai-output" style="display:none;"></div>
           </div>
@@ -1302,7 +1422,10 @@
       </div>
       <div class="form-group" style="margin-bottom:18px;">
         <label>Mot de passe</label>
-        <input type="password" id="loginPwd" placeholder="••••••••">
+        <div class="pwd-wrap">
+          <input type="password" id="loginPwd" placeholder="••••••••">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('loginPwd', this)" aria-label="Afficher / masquer le mot de passe" title="Afficher / masquer">👁️</button>
+        </div>
       </div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doSignIn()">🔓 Se connecter</button>
     </div>
@@ -1316,9 +1439,24 @@
         <label>Email</label>
         <input type="email" id="signupEmail" placeholder="vous@menaet.ci">
       </div>
-      <div class="form-group" style="margin-bottom:18px;">
+      <div class="form-group" style="margin-bottom:12px;">
         <label>Mot de passe</label>
-        <input type="password" id="signupPwd" placeholder="••••••••">
+        <div class="pwd-wrap">
+          <input type="password" id="signupPwd" placeholder="••••••••">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('signupPwd', this)" aria-label="Afficher / masquer le mot de passe" title="Afficher / masquer">👁️</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:18px;">
+        <label>Direction de rattachement *</label>
+        <select id="signupDir">
+          <option value="">— Sélectionner —</option>
+          <option value="dcep">DCEP — Construction & Équipements</option>
+          <option value="desps">DESPS — Digitalisation & Informatique</option>
+          <option value="daf">DAF — Affaires Financières</option>
+          <option value="dapscoges">DAPS-COGES — Vie scolaire & COGES</option>
+          <option value="sgp">SGP — Secrétariat Général & Patrimoine</option>
+          <option value="drh">DRH — Ressources Humaines</option>
+        </select>
       </div>
       <div style="font-size:11.5px;color:var(--grey);background:var(--cream);padding:9px 12px;border-radius:6px;margin-bottom:14px;">
         ℹ️ Le tout premier compte créé devient automatiquement administrateur.
@@ -1345,7 +1483,6 @@
     <div class="modal-body">
       <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--cream);border-radius:8px;padding:4px;">
         <button class="login-tab active" data-paramtab="firebase" onclick="switchParamTab('firebase')">☁️ Firebase</button>
-        <button class="login-tab" data-paramtab="ai" onclick="switchParamTab('ai')">🤖 IA Anthropic</button>
         <button class="login-tab" data-paramtab="repertoire" onclick="switchParamTab('repertoire')">📚 Répertoire CDP</button>
         <button class="login-tab" data-paramtab="users" onclick="switchParamTab('users')">👥 Utilisateurs</button>
         <button class="login-tab" data-paramtab="data" onclick="switchParamTab('data')">💾 Données</button>
@@ -1355,10 +1492,13 @@
       <div class="param-pane" id="paramPaneFirebase">
         <div class="ai-panel">
           <div class="ai-panel-title">☁️ Synchronisation cloud Firebase</div>
-          <div class="ai-panel-text">Collez votre configuration Firebase (JSON depuis Firebase Console → Project Settings → Web SDK). La clé reste en localStorage, jamais dans le code source — pas de blocage GitHub Secret Scanning.</div>
+          <div class="ai-panel-text">La plateforme est pré-configurée pour se connecter automatiquement à la base de données officielle MENAET. Vous pouvez utiliser une configuration personnalisée ci-dessous si nécessaire.</div>
+        </div>
+        <div id="fbDefaultBanner" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--green-light);border-left:4px solid var(--green);border-radius:6px;font-size:13px;color:#0F5132;">
+          <strong>✓ Base en ligne pré-configurée active.</strong> Connexion automatique au projet officiel MENAET CDP.
         </div>
         <div class="form-group" style="margin-bottom:12px;">
-          <label>Configuration Firebase (JSON)</label>
+          <label>Configuration Firebase (JSON) — modifiable</label>
           <textarea id="fbConfigInput" rows="8" placeholder='{
   "apiKey": "...",
   "authDomain": "...",
@@ -1370,30 +1510,10 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="saveFirebaseConfig()">💾 Connecter Firebase</button>
+          <button class="btn" onclick="restoreDefaultFbConfig()">↩️ Restaurer config officielle</button>
           <button class="btn btn-red" onclick="clearFirebaseConfig()">✕ Déconnecter</button>
           <button class="btn" onclick="syncPull()">🔄 Resynchroniser</button>
         </div>
-      </div>
-
-      <!-- PANE: IA -->
-      <div class="param-pane" id="paramPaneAi" style="display:none;">
-        <div class="ai-panel">
-          <div class="ai-panel-title">🤖 Clé API Anthropic (Claude)</div>
-          <div class="ai-panel-text">Permet de générer des rapports rédigés professionnellement par IA. Obtenez votre clé sur console.anthropic.com. La clé est stockée uniquement dans votre navigateur.</div>
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Clé API Anthropic</label>
-          <input type="password" id="aiKeyInput" placeholder="sk-ant-...">
-        </div>
-        <div class="form-group" style="margin-bottom:14px;">
-          <label>Modèle</label>
-          <select id="aiModelInput">
-            <option value="claude-opus-4-7">Claude Opus 4.7 (meilleur, plus lent)</option>
-            <option value="claude-sonnet-4-6" selected>Claude Sonnet 4.6 (équilibré)</option>
-            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (rapide)</option>
-          </select>
-        </div>
-        <button class="btn btn-gold" onclick="saveAiKey()">💾 Enregistrer la clé</button>
       </div>
 
       <!-- PANE: Répertoire CDP -->
@@ -1409,7 +1529,7 @@
         </div>
         <div style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
           <table class="data-table" id="repertoireTable">
-            <thead><tr><th>Établissement</th><th>Chef</th><th>DRENAET</th><th>Contact</th><th style="width:90px;">Actions</th></tr></thead>
+            <thead><tr><th>Établissement</th><th>Chef (Fonction)</th><th>DRENAET</th><th>Contact</th><th>Email</th><th style="width:90px;">Actions</th></tr></thead>
             <tbody id="repertoireBody"></tbody>
           </table>
         </div>
@@ -1424,7 +1544,7 @@
           </div>
           <div style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
             <table class="data-table">
-              <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th style="width:90px;">Actions</th></tr></thead>
+              <thead><tr><th>Nom</th><th>Email</th><th>Direction</th><th>Rôle</th><th style="width:90px;">Actions</th></tr></thead>
               <tbody id="usersBody"></tbody>
             </table>
           </div>
@@ -1599,14 +1719,31 @@
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>Mot de passe *</label>
-        <input type="text" id="usrPwd" placeholder="Mot de passe">
+        <div class="pwd-wrap">
+          <input type="password" id="usrPwd" placeholder="Mot de passe">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('usrPwd', this)" aria-label="Afficher / masquer le mot de passe" title="Afficher / masquer">👁️</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Rôle</label>
-        <select id="usrRole">
-          <option value="user">Utilisateur standard</option>
-          <option value="admin">Administrateur</option>
-        </select>
+      <div class="form-grid" style="margin-bottom:0;">
+        <div class="form-group">
+          <label>Rôle</label>
+          <select id="usrRole">
+            <option value="user">Utilisateur standard</option>
+            <option value="admin">Administrateur</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Direction de rattachement *</label>
+          <select id="usrDir">
+            <option value="">— Sélectionner —</option>
+            <option value="dcep">DCEP — Construction</option>
+            <option value="desps">DESPS — Digitalisation</option>
+            <option value="daf">DAF — Affaires Financières</option>
+            <option value="dapscoges">DAPS-COGES — Vie scolaire</option>
+            <option value="sgp">SGP — Patrimoine</option>
+            <option value="drh">DRH — Ressources Humaines</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1649,8 +1786,6 @@ const LS = {
   user: APP_NAME + '_user',
   users: APP_NAME + '_users',
   fbConfig: APP_NAME + '_fbConfig',
-  aiKey: APP_NAME + '_aiKey',
-  aiModel: APP_NAME + '_aiModel',
   fiches: APP_NAME + '_fiches',
   currentFiche: APP_NAME + '_currentFicheId',
   repertoire: APP_NAME + '_repertoire',
@@ -1661,36 +1796,126 @@ const COL = {
   users: 'fvcdp_users',
 };
 
-const CONSTATS_LIST = [
-  { id: 'etancheite',           label: "Problème d'étanchéité (toiture ou mur)",                          cat: 'Gros œuvre' },
-  { id: 'fissures',             label: "Présence de fissures (bâtiment, clôture, plancher)",               cat: 'Gros œuvre' },
-  { id: 'construction_inach',   label: "Construction inachevée",                                            cat: 'Gros œuvre' },
-  { id: 'plafond_porte',        label: "Plafond, portes ou tables-bancs endommagés",                       cat: 'Second œuvre' },
-  { id: 'splits',               label: "Climatiseurs (splits) inexistants ou défaillants",                 cat: 'Équipements' },
-  { id: 'inondation',           label: "Inondation constatée (cour, classes, bureaux, toilettes, terrain)",cat: 'VRD' },
-  { id: 'serrures',             label: "Serrures défaillantes (portes ou portails)",                       cat: 'Second œuvre' },
-  { id: 'gazon',                label: "Gazon ou pelouse inexistant",                                      cat: 'Aménagements' },
-  { id: 'vitres',               label: "Vitres défaillantes",                                              cat: 'Second œuvre' },
-  { id: 'caniveau',             label: "Caniveaux mal construits ou inexistants",                          cat: 'VRD' },
-  { id: 'chateau_eau',          label: "Château d'eau défaillant",                                         cat: 'Équipements' },
-  { id: 'absence_mobilier',     label: "Absence de mobiliers",                                             cat: 'Équipements' },
-  { id: 'absence_eau',          label: "Absence d'eau",                                                    cat: 'Équipements' },
+// ─────────────────────────────────────────────────────────────────
+// CONFIG FIREBASE PAR DÉFAUT (base "en ligne" pré-câblée)
+// ─────────────────────────────────────────────────────────────────
+// ⚠️ REMPLACEZ ces valeurs par celles de votre projet Firebase dédié
+// Console Firebase → Project Settings → Web SDK → Config
+// Les utilisateurs n'auront rien à coller : la config est chargée
+// automatiquement au 1er démarrage. Modifiable dans Paramètres ⚙️.
+const DEFAULT_FB_CONFIG = {
+  apiKey: "REMPLACER_PAR_VOTRE_API_KEY",
+  authDomain: "REMPLACER.firebaseapp.com",
+  projectId: "REMPLACER",
+  storageBucket: "REMPLACER.appspot.com",
+  messagingSenderId: "REMPLACER",
+  appId: "REMPLACER",
+};
+// Pour savoir si la config par défaut est "vraie" (sinon on ne tente pas de connexion auto)
+function isValidFbConfig(cfg) {
+  if (!cfg || typeof cfg !== 'object') return false;
+  return !!(cfg.apiKey && cfg.projectId
+    && !String(cfg.apiKey).startsWith('REMPLACER')
+    && !String(cfg.projectId).startsWith('REMPLACER'));
+}
+
+// Directions partenaires de la mission
+const DIRECTIONS = [
+  { id: 'dcep',     code: 'DCEP',      label: "DCEP — Construction & Équipements Pédagogiques",   color: '#1B4F8A', icon: '🏗️' },
+  { id: 'desps',    code: 'DESPS',     label: "DESPS — Digitalisation & Informatique",            color: '#7B3FBF', icon: '💻' },
+  { id: 'daf',      code: 'DAF',       label: "DAF — Affaires Financières",                       color: '#16A34A', icon: '💰' },
+  { id: 'dapscoges',code: 'DAPS-COGES',label: "DAPS-COGES — Vie scolaire & COGES",                color: '#D97706', icon: '👥' },
+  { id: 'sgp',      code: 'SGP',       label: "SGP — Secrétariat Général & Patrimoine",           color: '#DC2626', icon: '🏛️' },
+  { id: 'drh',      code: 'DRH',       label: "DRH — Ressources Humaines",                        color: '#0891B2', icon: '👤' },
 ];
+
+// Constats par direction
+const CONSTATS_BY_DIR = {
+  dcep: [
+    { id: 'etancheite',           label: "Problème d'étanchéité (toiture ou mur)",                          cat: 'Gros œuvre' },
+    { id: 'fissures',             label: "Présence de fissures (bâtiment, clôture, plancher)",               cat: 'Gros œuvre' },
+    { id: 'construction_inach',   label: "Construction inachevée",                                            cat: 'Gros œuvre' },
+    { id: 'plafond_porte',        label: "Plafond, portes ou tables-bancs endommagés",                       cat: 'Second œuvre' },
+    { id: 'splits',               label: "Climatiseurs (splits) inexistants ou défaillants",                 cat: 'Équipements' },
+    { id: 'inondation',           label: "Inondation constatée (cour, classes, bureaux, toilettes, terrain)",cat: 'VRD' },
+    { id: 'serrures',             label: "Serrures défaillantes (portes ou portails)",                       cat: 'Second œuvre' },
+    { id: 'gazon',                label: "Gazon ou pelouse inexistant",                                      cat: 'Aménagements' },
+    { id: 'vitres',               label: "Vitres défaillantes",                                              cat: 'Second œuvre' },
+    { id: 'caniveau',             label: "Caniveaux mal construits ou inexistants",                          cat: 'VRD' },
+    { id: 'chateau_eau',          label: "Château d'eau défaillant",                                         cat: 'Équipements' },
+    { id: 'absence_mobilier',     label: "Absence de mobiliers",                                             cat: 'Équipements' },
+    { id: 'absence_eau',          label: "Absence d'eau",                                                    cat: 'Équipements' },
+  ],
+  desps: [
+    { id: 'arrete_ouverture',     label: "L'établissement a-t-il un arrêté d'ouverture ? Si Oui, code d'ouverture ?",                cat: 'Carte scolaire' },
+    { id: 'effectif_eleves',      label: "Quel est l'effectif des élèves réel et remonté sur la plateforme DESPS ?",                 cat: 'Statistiques' },
+    { id: 'reseau',               label: "Connexion internet / réseau local opérationnel (inscriptions en ligne possibles) ?",        cat: 'Réseau' },
+    { id: 'immatriculation',      label: "Tous les élèves sont-ils immatriculés ? Si non, combien ? Combien ont des identifiants ?", cat: 'Immatriculation' },
+    { id: 'corrections',          label: "Y a-t-il des corrections d'identité ou de date de naissance ? Si Oui, combien par type ?", cat: 'Corrections' },
+    { id: 'denomination',         label: "L'établissement a-t-il une demande de dénomination selon la carte scolaire ?",             cat: 'Carte scolaire' },
+  ],
+  daf: [
+    { id: 'bureau_intendant',     label: "Bureau du gestionnaire / intendant équipé (coffre, mobilier)",     cat: 'Logistique' },
+    { id: 'stockage_biens',       label: "Locaux de stockage des biens conformes (économat, magasin)",       cat: 'Patrimoine' },
+    { id: 'inventaire_pv',        label: "Inventaire physique des équipements livrés correspondant au PV",   cat: 'Contrôle' },
+    { id: 'doc_comptable',        label: "Documentation comptable et budgétaire installée (registres)",      cat: 'Documentation' },
+    { id: 'conformite_marche',    label: "Conformité des installations avec le marché (qualité, finitions)", cat: 'Conformité' },
+  ],
+  dapscoges: [
+    { id: 'coges_existe',         label: "Existe-t-il un COGES dans l'établissement ?",                                              cat: 'COGES' },
+    { id: 'coges_fonctionnel',    label: "Le COGES est-il fonctionnel ?",                                                            cat: 'COGES' },
+    { id: 'coges_sensibilisation',label: "Le COGES a-t-il mené des actions de sensibilisation pour la maintenance et l'entretien du collège ?", cat: 'COGES' },
+    { id: 'coges_bilan',          label: "Comment jugez-vous le bilan des activités de mobilisation de la communauté ? (préciser : Très bien / Bien / Passable / À améliorer)", cat: 'Bilan COGES' },
+    { id: 'coges_recommandations',label: "Quelles recommandations pouvez-vous faire pour la bonne marche du COGES ?", cat: 'Recommandations', freeText: true },
+    { id: 'coges_fonction',       label: "Quelle est votre fonction au sein du COGES ?",                                              cat: 'Répondant', freeText: true },
+  ],
+  sgp: [
+    { id: 'plaque_ident',         label: "Plaque d'identification de l'établissement posée",                 cat: 'Identification' },
+    { id: 'portail',              label: "Borne / portail d'entrée conforme",                                cat: 'Accès' },
+    { id: 'cloture',              label: "Clôture périmétrique complète et sécurisée",                       cat: 'Sécurité' },
+    { id: 'titre_foncier',        label: "Documents de propriété / titre foncier disponibles",               cat: 'Foncier' },
+    { id: 'logement_chef',        label: "Logement de fonction du chef d'établissement (si prévu)",          cat: 'Logements' },
+  ],
+  drh: [
+    { id: 'bureaux_admin',        label: "Bureaux administratifs (Principal, Censeur, Éducateur) équipés",   cat: 'Bureaux' },
+    { id: 'salle_profs',          label: "Salle des professeurs fonctionnelle",                              cat: 'Enseignants' },
+    { id: 'bureau_chef',          label: "Bureau du chef d'établissement opérationnel",                      cat: 'Direction' },
+    { id: 'conditions_travail',   label: "Conditions de travail des personnels conformes",                   cat: 'Conditions' },
+    { id: 'logements_ens',        label: "Logements de fonction des enseignants (si prévus)",                cat: 'Logements' },
+  ],
+};
+
+// Liste plate pour rétrocompatibilité (utilisée par buildSummary, IA, exports)
+const CONSTATS_LIST_FLAT = [];
+DIRECTIONS.forEach(d => {
+  (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+    CONSTATS_LIST_FLAT.push({ ...c, dir: d.id, dirCode: d.code });
+  });
+});
+// Alias rétrocompat
+const CONSTATS_LIST = CONSTATS_LIST_FLAT;
+
+// Réserves : délais par défaut selon catégorie
+function getDefaultReserveDelay(cat) {
+  if (/Gros œuvre|Sécurité/i.test(cat)) return '15 jours';
+  if (/VRD|Équipements|Conformité/i.test(cat)) return '30 jours';
+  return '30 jours';
+}
 
 // Répertoire pré-chargé : 12 CDP de San Pédro (depuis Excel)
 const INITIAL_CDPS = [
-  { id:'cdp_001', nom:"ANGORA MARIE HORT.",       drena:'San Pédro', base:'', chef:"",                          fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_002', nom:"ASSOMA ASSI LEVARISTE",    drena:'San Pédro', base:'', chef:"ASSOMA ASSI LEVARISTE",     fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_003', nom:"TIDOU SYLVIE NOELLE",      drena:'San Pédro', base:'', chef:"TIDOU SYLVIE NOELLE",       fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_004', nom:"BAMBA VAYA",               drena:'San Pédro', base:'', chef:"BAMBA VAYA",                fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_005', nom:"OUASSA NDA DENISE",        drena:'San Pédro', base:'', chef:"OUASSA NDA DENISE",         fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_006', nom:"ASSOUMA MICHELINE",        drena:'San Pédro', base:'', chef:"ASSOUMA MICHELINE",         fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_007', nom:"KOUADIO KOFFI ROGER",      drena:'San Pédro', base:'', chef:"KOUADIO KOFFI ROGER",       fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_008', nom:"TOKORE AHI LELOI",         drena:'San Pédro', base:'', chef:"TOKORE AHI LELOI",          fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_009', nom:"DIECKET FELICITE",         drena:'San Pédro', base:'', chef:"DIECKET FELICITE",          fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_010', nom:"KOUAME JOSEPH",            drena:'San Pédro', base:'', chef:"KOUAME JOSEPH",             fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_011', nom:"KOUAKOU YAO",              drena:'San Pédro', base:'', chef:"KOUAKOU YAO",               fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
-  { id:'cdp_012', nom:"POPE YABLAH",              drena:'San Pédro', base:'', chef:"POPE YABLAH",               fonction:'Principal', tel:'',                email:'', localite:'San Pédro' },
+  { id:'cdp_001', nom:"COLLÈGE MODERNE DE FAYE",       drena:'San Pédro', base:'', chef:"ANGORA MARIE HORT.",                fonction:'Principale', tel:'0505761908', email:'hortyangora@gmail.com',         localite:'San Pédro' },
+  { id:'cdp_002', nom:"COLLÈGE MODERNE DE HANNIE",     drena:'San Pédro', base:'', chef:"ASSOMA ASSI EVARISTE J.N. G",       fonction:'Principal',  tel:'0747081325', email:'assomaassighislain@yahoo.fr',     localite:'San Pédro' },
+  { id:'cdp_003', nom:"COLLÈGE MODERNE DE GNITY-EC",   drena:'San Pédro', base:'', chef:"TIDOU SYLVIE NOELLE",               fonction:'Principale', tel:'0767600357', email:'Tidousylvie69@gmail.com',         localite:'San Pédro' },
+  { id:'cdp_004', nom:"COLLÈGE MODERNE DE PARA",       drena:'San Pédro', base:'', chef:"BAMBA VAYA",                        fonction:'Principal',  tel:'0504448708', email:'vayabamba@gmail.com',             localite:'San Pédro' },
+  { id:'cdp_005', nom:"COLLÈGE MODERNE DE MAHINO",     drena:'San Pédro', base:'', chef:"OUASSA NDA DENISE Epse KOFFI",      fonction:'Principale', tel:'0708947461', email:'oussanda@gmail.com',              localite:'San Pédro' },
+  { id:'cdp_006', nom:"COLLÈGE MODERNE GROBONOU",      drena:'San Pédro', base:'', chef:"ASSOUMA MICHELINE Epse AHOU",       fonction:'Principale', tel:'0505395497', email:'Michelineassouman@gmail.com',     localite:'San Pédro' },
+  { id:'cdp_007', nom:"COLLÈGE MODERNE DE OUEOULO",    drena:'San Pédro', base:'', chef:"KOUADIO KOFFI ROGER",               fonction:'Principal',  tel:'0707573024', email:'Koffirogerk75@gmail.com',         localite:'San Pédro' },
+  { id:'cdp_008', nom:"COLLÈGE MODERNE DE GBAPET",     drena:'San Pédro', base:'', chef:"TOKORE NAHI ELOI",                  fonction:'Principal',  tel:'0757200347', email:'Tokorenahi3@gmail.com',           localite:'San Pédro' },
+  { id:'cdp_009', nom:"COLLÈGE MODERNE DE BLAHOU",     drena:'San Pédro', base:'', chef:"DIECKET PELAGIE",                   fonction:'Principale', tel:'0707761654', email:'plaubau@gmail.com',               localite:'San Pédro' },
+  { id:'cdp_010', nom:"COLLÈGE MODERNE DE YOUWASSO",   drena:'San Pédro', base:'', chef:"ASSAGOU JOSEPH",                    fonction:'Principale', tel:'0707301035', email:'Josephassagou77@gmail.com',       localite:'San Pédro' },
+  { id:'cdp_011', nom:"COLLÈGE MODERNE ADJAMENE",      drena:'San Pédro', base:'', chef:"KOUAKOU YAO",                       fonction:'Principal',  tel:'0505618269', email:'cmadjamene@gmail.com',            localite:'San Pédro' },
+  { id:'cdp_012', nom:"COLLÈGE MODERNE DE MANE",       drena:'San Pédro', base:'', chef:"POPE YABLAIH",                      fonction:'Principale', tel:'0101151769', email:'aayablaih@gmail.com',             localite:'San Pédro' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1709,6 +1934,7 @@ const state = {
   publicMode: false,      // mode consultation publique
   currentTab: 'identification',
   currentEtab: 0,
+  currentDir: 'dcep',     // direction active dans l'onglet constats
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1739,12 +1965,40 @@ function toast(msg, type = '') {
 function openModal(id) { $(id).classList.add('open'); }
 function closeModal(id) { $(id).classList.remove('open'); }
 
+// Toggle 👁️ visibilité mot de passe
+function togglePwd(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    if (btn) btn.textContent = '🙈';
+    if (btn) btn.title = 'Masquer le mot de passe';
+  } else {
+    inp.type = 'password';
+    if (btn) btn.textContent = '👁️';
+    if (btn) btn.title = 'Afficher le mot de passe';
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // FICHE — MODÈLE
 // ═══════════════════════════════════════════════════════════════════
 function createEtab() {
+  // constats : { dirId: { constatId: { reponse, description, photos } } }
+  // autresConstats : { dirId: [strings] }
+  // reservesManual : [{ desc, delai, statut, dir }] - réserves AJOUTÉES manuellement uniquement
+  // signaturesByDir : { dirId: { name, fonction, dataUrl } } - 1 signature dessinée par direction
+  // sigChef : { name, etab, dataUrl } / sigEnt : { name, entreprise, dataUrl }
+  const constats = {};
+  const autres = {};
+  const sigs = {};
+  DIRECTIONS.forEach(d => {
+    constats[d.id] = {};
+    autres[d.id] = [];
+    sigs[d.id] = { name:'', fonction:'', dataUrl:'' };
+  });
   return {
-    cdpId: null,          // référence éventuelle au répertoire
+    cdpId: null,
     college: '',
     base: '',
     chef: '',
@@ -1758,9 +2012,12 @@ function createEtab() {
     fonctionnalite: '',
     observations: '',
     recommandations: '',
-    constats: {},
-    autresConstats: [],
-    reserves: [],
+    constats,
+    autresConstats: autres,
+    reservesManual: [],
+    signaturesByDir: sigs,
+    sigChef: { name:'', etab:'', dataUrl:'' },
+    sigEnt: { name:'', entreprise:'', dataUrl:'' },
   };
 }
 
@@ -1775,15 +2032,13 @@ function createFiche() {
     dateVisite: new Date().toISOString().split('T')[0],
     numRapport: '',
     heureVisite: '',
-    drena: '',
+    drena: 'San Pédro',
     nomEnqueteur: '',
-    // Établissements
+    // Établissements (chacun porte ses signatures par direction + chef + entreprise)
     etabs: [createEtab()],
-    // Signatures
-    sig1Name: '', sig1Titre: '',
-    sig2Name: '', sig2Etab: '',
-    sig3Name: '', sig3Entreprise: '',
-    // AI generated text
+    // Overrides des délais/statuts pour les réserves auto
+    reservesOverrides: {},
+    // Rapport composé
     aiReport: '',
   };
 }
@@ -1802,11 +2057,27 @@ function loadFromLS() {
   } catch(e) { state.users = []; }
   try {
     const r = localStorage.getItem(LS.repertoire);
+    let needsMigration = false;
     if (r) {
-      state.repertoire = JSON.parse(r);
-    } else {
+      const stored = JSON.parse(r);
+      // Détection de l'ancien format : nom de chef au lieu du collège, OU pas de téléphone
+      // Si AUCUN n'a "COLL" dans son nom, c'est l'ancien format → migration automatique
+      const hasCollegeNames = stored.some(c => /coll/i.test(c.nom || ''));
+      const hasPhones = stored.some(c => (c.tel || '').replace(/\D/g, '').length >= 8);
+      if (!hasCollegeNames || (!hasPhones && stored.length >= 5)) {
+        needsMigration = true;
+      } else {
+        state.repertoire = stored;
+      }
+    }
+    if (!r || needsMigration) {
+      // Premier démarrage OU migration : charger le répertoire officiel à jour
       state.repertoire = INITIAL_CDPS.slice();
       saveLocal('repertoire');
+      if (needsMigration) {
+        // Toast informatif au prochain tick (le DOM doit être prêt)
+        setTimeout(() => toast('Répertoire CDP mis à jour avec les données officielles', 'success'), 800);
+      }
     }
   } catch(e) { state.repertoire = INITIAL_CDPS.slice(); }
   try {
@@ -1828,13 +2099,16 @@ function saveLocal(key) {
 // TABS PRINCIPAUX
 // ═══════════════════════════════════════════════════════════════════
 function switchTab(tab, ev) {
+  // Sauvegarder l'état actuel avant de changer
+  if (state.currentFiche) saveCurrentEtab();
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
   const panel = $('tab-' + tab);
   if (panel) panel.classList.add('active');
   if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
   state.currentTab = tab;
-  if (tab === 'signatures') buildSummary();
+  if (tab === 'signatures') { buildSummary(); renderSignatures(); }
+  if (tab === 'reserves') renderReservesSynthesis();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1898,6 +2172,7 @@ function saveCurrentEtab() {
   e.contacts = getVal('.f-contacts');
   e.email = getVal('.f-email');
   e.fonction = getVal('.f-fonction');
+  e.entreprise = getVal('.f-rep-entreprise') ? getVal('.f-entreprise') : e.entreprise;
   e.entreprise = getVal('.f-entreprise');
   e.repEntreprise = getVal('.f-rep-entreprise');
   e.localite = getVal('.f-localite');
@@ -1906,40 +2181,113 @@ function saveCurrentEtab() {
   e.etatGlobal = getVal('.f-etat-global');
   e.fonctionnalite = getVal('.f-fonctionnalite');
 
-  // Constats
-  CONSTATS_LIST.forEach(c => {
+  // Migration éventuelle ancien format
+  ensureConstatStructure(e);
+
+  // Sauver les constats de la DIRECTION COURANTE (les autres sont déjà en mémoire)
+  const dir = state.currentDir;
+  const list = CONSTATS_BY_DIR[dir] || [];
+  list.forEach(c => {
+    if (c.freeText) {
+      // Champ libre : pas de OUI/NON
+      const desc = $(`desc_${c.id}_${state.currentEtab}`);
+      if (desc) {
+        if (!e.constats[dir]) e.constats[dir] = {};
+        e.constats[dir][c.id] = {
+          reponse: desc.value.trim() ? 'TEXTE' : '',
+          description: desc.value,
+          photos: [],
+        };
+      }
+      return;
+    }
     const oui = $(`oui_${c.id}_${state.currentEtab}`);
     const non = $(`non_${c.id}_${state.currentEtab}`);
     const desc = $(`desc_${c.id}_${state.currentEtab}`);
     if (oui && non) {
-      const prev = e.constats[c.id] || {};
-      e.constats[c.id] = {
+      const prev = (e.constats[dir] && e.constats[dir][c.id]) || {};
+      if (!e.constats[dir]) e.constats[dir] = {};
+      e.constats[dir][c.id] = {
         reponse: oui.checked ? 'OUI' : (non.checked ? 'NON' : ''),
         description: desc ? desc.value : '',
         photos: prev.photos || [],
       };
     }
   });
-  // Autres constats
-  e.autresConstats = [];
+  // Autres constats (par direction)
+  if (!e.autresConstats[dir]) e.autresConstats[dir] = [];
+  e.autresConstats[dir] = [];
   document.querySelectorAll('.autre-constat-desc').forEach(el => {
-    e.autresConstats.push(el.value);
+    e.autresConstats[dir].push(el.value);
   });
-  // Réserves
-  e.reserves = [];
-  document.querySelectorAll('.reserve-row').forEach(el => {
-    e.reserves.push({
-      desc: el.querySelector('.r-desc').value,
-      delai: el.querySelector('.r-delai').value,
-      statut: el.querySelector('.r-statut').value,
+  // Réserves manuelles : on sauvegarde séparément depuis le tab Réserves
+  saveManualReserves(e);
+}
+
+// Migration des fiches anciennes (constats à plat) vers nouvelle structure par direction
+function ensureConstatStructure(etab) {
+  // Si constats n'a pas une clé direction, c'est l'ancien format
+  const hasDirKeys = etab.constats && DIRECTIONS.some(d => etab.constats[d.id] !== undefined && typeof etab.constats[d.id] === 'object' && !etab.constats[d.id].reponse);
+  if (!hasDirKeys && etab.constats && Object.keys(etab.constats).length > 0) {
+    // Anciens constats DCEP plats → migrer vers dcep
+    const old = etab.constats;
+    const newC = {};
+    DIRECTIONS.forEach(d => { newC[d.id] = {}; });
+    Object.keys(old).forEach(k => {
+      // Trouver dans quelle direction se trouve ce constat
+      const found = DIRECTIONS.find(d => (CONSTATS_BY_DIR[d.id] || []).some(c => c.id === k));
+      if (found) newC[found.id][k] = old[k];
+      else newC.dcep[k] = old[k]; // fallback
     });
-  });
+    etab.constats = newC;
+  } else if (!etab.constats) {
+    etab.constats = {};
+    DIRECTIONS.forEach(d => { etab.constats[d.id] = {}; });
+  } else {
+    // S'assurer que toutes les directions sont initialisées
+    DIRECTIONS.forEach(d => { if (!etab.constats[d.id]) etab.constats[d.id] = {}; });
+  }
+  // Idem autres constats
+  if (Array.isArray(etab.autresConstats)) {
+    // Ancien format : tableau plat → on le rattache à dcep
+    const old = etab.autresConstats;
+    etab.autresConstats = {};
+    DIRECTIONS.forEach(d => { etab.autresConstats[d.id] = []; });
+    etab.autresConstats.dcep = old;
+  } else if (!etab.autresConstats) {
+    etab.autresConstats = {};
+    DIRECTIONS.forEach(d => { etab.autresConstats[d.id] = []; });
+  } else {
+    DIRECTIONS.forEach(d => { if (!etab.autresConstats[d.id]) etab.autresConstats[d.id] = []; });
+  }
+  // Réserves manuelles
+  if (!Array.isArray(etab.reservesManual)) {
+    // Récupérer anciennes réserves si présentes
+    if (Array.isArray(etab.reserves)) {
+      etab.reservesManual = etab.reserves.map(r => ({ ...r, dir: '', source: 'manual' }));
+      delete etab.reserves;
+    } else {
+      etab.reservesManual = [];
+    }
+  }
+  // Signatures par direction au niveau de l'établissement
+  if (!etab.signaturesByDir) {
+    etab.signaturesByDir = {};
+    DIRECTIONS.forEach(d => { etab.signaturesByDir[d.id] = { name:'', fonction:'', dataUrl:'' }; });
+  } else {
+    DIRECTIONS.forEach(d => {
+      if (!etab.signaturesByDir[d.id]) etab.signaturesByDir[d.id] = { name:'', fonction:'', dataUrl:'' };
+    });
+  }
+  if (!etab.sigChef) etab.sigChef = { name:'', etab:'', dataUrl:'' };
+  if (!etab.sigEnt) etab.sigEnt = { name:'', entreprise:'', dataUrl:'' };
 }
 
 function loadEtab(idx) {
   if (!state.currentFiche) return;
   const e = state.currentFiche.etabs[idx];
   if (!e) return;
+  ensureConstatStructure(e);
   $('etabLabel').textContent = idx + 1;
   const setVal = (sel, v) => { const el = document.querySelector(sel); if (el) el.value = v || ''; };
   setVal('.f-college', e.college);
@@ -1956,18 +2304,22 @@ function loadEtab(idx) {
   setVal('.f-etat-global', e.etatGlobal);
   setVal('.f-fonctionnalite', e.fonctionnalite);
 
+  renderDirSubTabs();
   renderConstats(idx);
-
-  const ac = $('autresConstats');
-  ac.innerHTML = '';
-  (e.autresConstats || []).forEach(desc => addAutreConstat(desc));
-
-  const rl = $('reservesList');
-  rl.innerHTML = '';
-  (e.reserves || []).forEach(r => addReserve(r));
+  renderAutresConstats(idx);
+  renderReservesSynthesis();
 
   updateProgress();
   updateCounters();
+}
+
+function renderAutresConstats(idx) {
+  const e = state.currentFiche.etabs[idx];
+  const dir = state.currentDir;
+  const ac = $('autresConstats');
+  ac.innerHTML = '';
+  autreIdx = 0;
+  ((e.autresConstats && e.autresConstats[dir]) || []).forEach(desc => addAutreConstat(desc));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1995,8 +2347,12 @@ function showAutocomplete(items) {
   if (!items.length) { list.classList.remove('open'); return; }
   list.innerHTML = items.map(c => `
     <div class="autocomplete-item" onmousedown="selectCdp('${c.id}')">
-      <div class="ac-name">${escapeHtml(c.nom)}</div>
-      <div class="ac-meta">${escapeHtml(c.chef || '—')} · ${escapeHtml(c.drena || '')}${c.tel ? ' · ' + escapeHtml(c.tel) : ''}</div>
+      <div class="ac-name">🏫 ${escapeHtml(c.nom)}</div>
+      <div class="ac-meta">
+        <strong>${escapeHtml(c.chef || '—')}</strong> (${escapeHtml(c.fonction || '—')})
+        ${c.tel ? ' · 📞 ' + escapeHtml(c.tel) : ''}
+        ${c.email ? ' · ✉️ ' + escapeHtml(c.email) : ''}
+      </div>
     </div>`).join('');
   list.classList.add('open');
 }
@@ -2035,21 +2391,100 @@ function selectCdp(cdpId) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// CONSTATS — rendu et photos
+// CONSTATS — sous-onglets par direction + rendu
 // ═══════════════════════════════════════════════════════════════════
+function getVisibleDirections() {
+  // Admin et invité voient tout. Sinon, on filtre par direction utilisateur.
+  if (!state.user) return DIRECTIONS;
+  if (state.user.role === 'admin' || state.user.direction === 'all') return DIRECTIONS;
+  if (state.publicMode) return DIRECTIONS; // mode lecture publique : tout visible
+  if (state.user.direction) {
+    const dir = DIRECTIONS.find(d => d.id === state.user.direction);
+    return dir ? [dir] : DIRECTIONS;
+  }
+  return DIRECTIONS;
+}
+
+function renderDirSubTabs() {
+  const container = $('dirSubTabs');
+  if (!container) return;
+  const visible = getVisibleDirections();
+  // Si la direction courante n'est pas visible, basculer sur la 1ère
+  if (!visible.some(d => d.id === state.currentDir)) {
+    state.currentDir = visible[0]?.id || 'dcep';
+  }
+  container.innerHTML = visible.map(d => {
+    const active = d.id === state.currentDir;
+    const e = state.currentFiche?.etabs[state.currentEtab];
+    const list = (CONSTATS_BY_DIR[d.id] || []);
+    let oui = 0;
+    if (e && e.constats && e.constats[d.id]) {
+      list.forEach(c => {
+        if (c.freeText) return;
+        const x = e.constats[d.id][c.id];
+        if (x && x.reponse === 'OUI') oui++;
+      });
+    }
+    return `<button class="etab-tab ${active ? 'active' : ''}" onclick="switchDir('${d.id}')" style="${active ? `border-color:${d.color};background:${d.color}1A;color:${d.color};` : ''}">
+      <span style="font-size:14px;">${d.icon}</span>
+      <span>${d.code}</span>
+      <span style="background:${oui > 0 ? 'var(--red)' : 'var(--grey-light)'};color:${oui > 0 ? 'white' : 'var(--grey)'};font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:4px;">${list.length}</span>
+    </button>`;
+  }).join('');
+
+  // En-tête de la direction
+  const dir = DIRECTIONS.find(d => d.id === state.currentDir);
+  if (dir) {
+    $('dirIcon').textContent = dir.icon;
+    $('dirTitle').textContent = `Constats — ${dir.label}`;
+    const hdr = $('dirConstatHeader');
+    if (hdr) hdr.style.background = dir.color;
+  }
+}
+
+function switchDir(dirId) {
+  if (!state.currentFiche) return;
+  // Sauver la direction actuelle avant de changer
+  saveCurrentEtab();
+  state.currentDir = dirId;
+  renderDirSubTabs();
+  renderConstats(state.currentEtab);
+  renderAutresConstats(state.currentEtab);
+  updateCounters();
+}
+
 function renderConstats(etabIdx) {
   if (!state.currentFiche) return;
   const e = state.currentFiche.etabs[etabIdx];
+  ensureConstatStructure(e);
+  const dir = state.currentDir;
+  const list = CONSTATS_BY_DIR[dir] || [];
   const tbody = $('constatsBody');
   tbody.innerHTML = '';
-  CONSTATS_LIST.forEach((c, i) => {
-    const saved = (e.constats && e.constats[c.id]) || {};
+  list.forEach((c, i) => {
+    const saved = (e.constats[dir] && e.constats[dir][c.id]) || {};
+    const tr = document.createElement('tr');
+    tr.id = `row_${c.id}_${etabIdx}`;
+
+    // ── Mode FREE TEXT (champ libre, pas de OUI/NON) ──
+    if (c.freeText) {
+      const desc = saved.description || '';
+      if (desc.trim()) tr.classList.add('has-issue'); // surlignage si rempli
+      tr.innerHTML = `
+        <td class="constat-num" style="background:#FEF3C7;color:#92400E;">📝</td>
+        <td class="constat-label">${escapeHtml(c.label)}<small>${escapeHtml(c.cat)} · Champ libre</small></td>
+        <td colspan="2">
+          <textarea id="desc_${c.id}_${etabIdx}" placeholder="${escapeHtml(c.id==='coges_recommandations'?'Vos recommandations...':'Votre fonction...')}" style="width:100%;min-height:60px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13.5px;" oninput="onFreeTextChange('${c.id}', ${etabIdx})">${escapeHtml(desc)}</textarea>
+        </td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    // ── Mode OUI/NON classique ──
     const isOui = saved.reponse === 'OUI';
     const isNon = saved.reponse === 'NON';
     const desc = saved.description || '';
     const photos = saved.photos || [];
-    const tr = document.createElement('tr');
-    tr.id = `row_${c.id}_${etabIdx}`;
     if (isOui) tr.classList.add('has-issue');
     tr.innerHTML = `
       <td class="constat-num">${i+1}</td>
@@ -2093,24 +2528,28 @@ async function onPhotoUpload(ev, constatId, etabIdx) {
   const files = Array.from(ev.target.files || []);
   if (!files.length) return;
   const e = state.currentFiche.etabs[etabIdx];
-  if (!e.constats[constatId]) e.constats[constatId] = { reponse:'', description:'', photos:[] };
-  if (!Array.isArray(e.constats[constatId].photos)) e.constats[constatId].photos = [];
+  ensureConstatStructure(e);
+  const dir = state.currentDir;
+  if (!e.constats[dir]) e.constats[dir] = {};
+  if (!e.constats[dir][constatId]) e.constats[dir][constatId] = { reponse:'', description:'', photos:[] };
+  if (!Array.isArray(e.constats[dir][constatId].photos)) e.constats[dir][constatId].photos = [];
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue;
     const dataUrl = await compressImage(file, 1024, 0.75);
-    e.constats[constatId].photos.push(dataUrl);
+    e.constats[dir][constatId].photos.push(dataUrl);
   }
   const cont = $(`photoThumbs_${constatId}_${etabIdx}`);
-  if (cont) cont.innerHTML = e.constats[constatId].photos.map((p, pi) => renderPhotoThumb(constatId, etabIdx, pi, p)).join('');
+  if (cont) cont.innerHTML = e.constats[dir][constatId].photos.map((p, pi) => renderPhotoThumb(constatId, etabIdx, pi, p)).join('');
   toast(`${files.length} photo(s) ajoutée(s)`, 'success');
 }
 
 function removePhoto(constatId, etabIdx, photoIdx) {
   const e = state.currentFiche.etabs[etabIdx];
-  if (!e.constats[constatId] || !e.constats[constatId].photos) return;
-  e.constats[constatId].photos.splice(photoIdx, 1);
+  const dir = state.currentDir;
+  if (!e.constats[dir] || !e.constats[dir][constatId] || !e.constats[dir][constatId].photos) return;
+  e.constats[dir][constatId].photos.splice(photoIdx, 1);
   const cont = $(`photoThumbs_${constatId}_${etabIdx}`);
-  if (cont) cont.innerHTML = e.constats[constatId].photos.map((p, pi) => renderPhotoThumb(constatId, etabIdx, pi, p)).join('');
+  if (cont) cont.innerHTML = e.constats[dir][constatId].photos.map((p, pi) => renderPhotoThumb(constatId, etabIdx, pi, p)).join('');
 }
 
 function compressImage(file, maxW = 1024, quality = 0.75) {
@@ -2152,11 +2591,25 @@ function onConstatChange(id, etabIdx) {
   if (row) row.classList.toggle('has-issue', isOui);
   updateCounters();
   updateProgress();
+  renderDirSubTabs();
+  // Si l'onglet réserves est ouvert, le rafraîchir
+  if (state.currentTab === 'reserves') renderReservesSynthesis();
+}
+
+function onFreeTextChange(id, etabIdx) {
+  // Pour les constats freeText : on met juste à jour le state, pas de toggle ni de réserve auto
+  const desc = $(`desc_${id}_${etabIdx}`);
+  const row = $(`row_${id}_${etabIdx}`);
+  if (row && desc) row.classList.toggle('has-issue', !!desc.value.trim());
+  // Pas d'updateCounters (les freeText ne comptent pas dans malfaçons/conformes)
 }
 
 function updateCounters() {
   let issues = 0, ok = 0, pending = 0;
-  CONSTATS_LIST.forEach(c => {
+  const dir = state.currentDir;
+  const list = CONSTATS_BY_DIR[dir] || [];
+  list.forEach(c => {
+    if (c.freeText) return; // ne pas compter les champs libres
     const oui = $(`oui_${c.id}_${state.currentEtab}`);
     const non = $(`non_${c.id}_${state.currentEtab}`);
     if (oui && oui.checked) issues++;
@@ -2166,25 +2619,31 @@ function updateCounters() {
   $('countIssues').textContent = issues;
   $('countOk').textContent = ok;
   $('countPending').textContent = pending;
-  $('tabConstatsNum').textContent = issues;
-  // Bottom bar
+
+  // Total tous établissements toutes directions pour bottom bar
   let totalIssues = 0;
   if (state.currentFiche) {
-    saveCurrentEtab();
     state.currentFiche.etabs.forEach(e => {
-      Object.values(e.constats || {}).forEach(c => { if (c.reponse === 'OUI') totalIssues++; });
+      ensureConstatStructure(e);
+      DIRECTIONS.forEach(d => {
+        (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+          if (c.freeText) return;
+          const x = (e.constats[d.id] || {})[c.id];
+          if (x && x.reponse === 'OUI') totalIssues++;
+        });
+      });
     });
   }
+  $('tabConstatsNum').textContent = totalIssues;
   $('genInfoMalfacons').textContent = totalIssues + ' malfaçon(s)';
   $('genInfoEtab').textContent = (state.currentFiche ? state.currentFiche.etabs.length : 0) + ' établissement(s)';
   const dv = $('dateVisite');
   $('genInfoDate').textContent = dv && dv.value ? new Date(dv.value).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}) : '–';
-  // Réserves totales
-  let totalReserves = 0;
+  let manualCount = 0;
   if (state.currentFiche) {
-    state.currentFiche.etabs.forEach(e => { totalReserves += (e.reserves || []).length; });
+    state.currentFiche.etabs.forEach(e => { manualCount += (e.reservesManual || []).length; });
   }
-  $('tabReservesNum').textContent = totalReserves;
+  $('tabReservesNum').textContent = totalIssues + manualCount;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2214,25 +2673,143 @@ function removeAutre(id) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// RÉSERVES
+// RÉSERVES — Synthèse automatique + Manuelles
 // ═══════════════════════════════════════════════════════════════════
-let reserveIdx = 0;
-function addReserve(data = {}) {
-  const container = $('reservesList');
-  const i = reserveIdx++;
+function renderReservesSynthesis() {
+  const container = $('reservesAutoContainer');
+  if (!container || !state.currentFiche) return;
+  saveCurrentEtab(); // s'assurer que les valeurs constats sont à jour
+  const visible = getVisibleDirections();
+  // Collecter toutes les réserves auto : 1 constat OUI = 1 réserve
+  const allEtabs = state.currentFiche.etabs;
+  if (!allEtabs.length) { container.innerHTML = '<div class="empty">Aucun établissement</div>'; return; }
+
+  let html = '';
+  let nReserves = 0;
+  allEtabs.forEach((e, etabIdx) => {
+    ensureConstatStructure(e);
+    const dirIssues = [];
+    visible.forEach(d => {
+      const list = CONSTATS_BY_DIR[d.id] || [];
+      list.forEach(c => {
+        if (c.freeText) return; // pas de réserve auto sur champ libre
+        const x = (e.constats[d.id] || {})[c.id] || {};
+        if (x.reponse === 'OUI') {
+          dirIssues.push({ dir: d, constat: c, saved: x });
+        }
+      });
+      // Autres constats par direction = réserves aussi
+      const autres = (e.autresConstats && e.autresConstats[d.id]) || [];
+      autres.forEach((desc, ai) => {
+        if (desc.trim()) {
+          dirIssues.push({ dir: d, constat: { id: `autre_${d.id}_${ai}`, label: 'Constat additionnel', cat: 'Autre' }, saved: { description: desc, photos: [] }, isAutre: true });
+        }
+      });
+    });
+    if (!dirIssues.length && allEtabs.length === 1) return; // skip si rien
+
+    if (allEtabs.length > 1) {
+      html += `<div style="margin-top:18px;font-family:'DM Serif Display',serif;font-size:16px;color:var(--blue);border-left:3px solid var(--blue);padding:6px 12px;background:var(--blue-light);">🏫 ${escapeHtml(e.college || 'Établissement ' + (etabIdx+1))}</div>`;
+    }
+    if (!dirIssues.length) {
+      html += `<div style="padding:14px;color:var(--green);text-align:center;font-size:13.5px;">✓ Aucune malfaçon constatée — pas de réserve à notifier</div>`;
+      return;
+    }
+    // Grouper par direction
+    const byDir = {};
+    dirIssues.forEach(item => {
+      if (!byDir[item.dir.id]) byDir[item.dir.id] = { dir: item.dir, items: [] };
+      byDir[item.dir.id].items.push(item);
+    });
+    Object.values(byDir).forEach(group => {
+      html += `<div style="margin-top:14px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="background:${group.dir.color}1A;border-left:4px solid ${group.dir.color};padding:10px 14px;font-weight:600;font-size:13.5px;color:${group.dir.color};">
+          ${group.dir.icon} ${group.dir.code} — ${escapeHtml(group.dir.label.split('—')[1] || '')} <span style="background:${group.dir.color};color:white;font-size:11px;padding:2px 7px;border-radius:4px;margin-left:6px;">${group.items.length} réserve(s)</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:#FAFBFD;">
+            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:0.4px;width:40px;">N°</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:0.4px;">Constat origine</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:0.4px;">Description / Action corrective</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:0.4px;width:120px;">Délai</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:0.4px;width:130px;">Statut</th>
+          </tr></thead>
+          <tbody>`;
+      group.items.forEach((item, idx) => {
+        nReserves++;
+        const key = `auto_${etabIdx}_${group.dir.id}_${item.constat.id}`;
+        const overrides = (state.currentFiche.reservesOverrides || {})[key] || {};
+        const delai = overrides.delai !== undefined ? overrides.delai : getDefaultReserveDelay(item.constat.cat);
+        const statut = overrides.statut || 'En cours';
+        html += `<tr style="border-top:1px solid var(--grey-light);">
+          <td style="padding:8px 10px;font-weight:700;color:${group.dir.color};">R${nReserves}</td>
+          <td style="padding:8px 10px;font-size:12.5px;color:var(--navy);">${escapeHtml(item.constat.label)}<br><span style="font-size:11px;color:var(--grey);">${escapeHtml(item.constat.cat)}</span></td>
+          <td style="padding:8px 10px;font-size:12.5px;color:var(--navy);font-style:${item.saved.description?'normal':'italic'};color:${item.saved.description?'var(--navy)':'var(--grey)'};">${escapeHtml(item.saved.description || '(constat sans description précise)')}</td>
+          <td style="padding:8px 10px;"><input type="text" value="${escapeHtml(delai)}" onchange="setReserveOverride('${key}','delai',this.value)" style="padding:5px 8px;font-size:12px;width:100%;"></td>
+          <td style="padding:8px 10px;"><select onchange="setReserveOverride('${key}','statut',this.value)" style="padding:5px 8px;font-size:12px;width:100%;">
+            <option ${statut==='En cours'?'selected':''}>En cours</option>
+            <option ${statut==='Levée'?'selected':''}>Levée</option>
+            <option ${statut==='Non engagée'?'selected':''}>Non engagée</option>
+          </select></td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+    });
+  });
+
+  if (!html) html = `<div class="empty"><div class="empty-icon">✓</div><div style="color:var(--green);font-weight:600;">Aucune malfaçon constatée</div><div style="margin-top:6px;">Aucune réserve à notifier</div></div>`;
+
+  container.innerHTML = html;
+  renderManualReserves();
+}
+
+function setReserveOverride(key, field, value) {
+  if (!state.currentFiche) return;
+  if (!state.currentFiche.reservesOverrides) state.currentFiche.reservesOverrides = {};
+  if (!state.currentFiche.reservesOverrides[key]) state.currentFiche.reservesOverrides[key] = {};
+  state.currentFiche.reservesOverrides[key][field] = value;
+}
+
+let manualReserveIdx = 0;
+function renderManualReserves() {
+  const container = $('reservesManualList');
+  if (!container || !state.currentFiche) return;
+  container.innerHTML = '';
+  manualReserveIdx = 0;
+  const e = state.currentFiche.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  (e.reservesManual || []).forEach(r => addManualReserveRow(r));
+}
+
+function addManualReserve() {
+  addManualReserveRow({ desc:'', delai:'30 jours', statut:'En cours', dir:'' });
+}
+
+function addManualReserveRow(data = {}) {
+  const container = $('reservesManualList');
+  const i = manualReserveIdx++;
   const div = document.createElement('div');
   div.className = 'autres-row reserve-row';
-  div.id = `res_${i}`;
+  div.id = `manres_${i}`;
+  const visible = getVisibleDirections();
   const n = container.children.length + 1;
   div.innerHTML = `
     <div class="autres-header">
-      <div class="autres-title">Réserve R${n}</div>
-      <button class="btn-remove" onclick="document.getElementById('res_${i}').remove(); updateReserveCount()">✕</button>
+      <div class="autres-title">Réserve manuelle M${n}</div>
+      <button class="btn-remove" onclick="removeManualReserve(${i})">✕</button>
     </div>
-    <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
       <div class="form-group full" style="grid-column:1/3;">
         <label>Description de la réserve</label>
-        <textarea class="r-desc" placeholder="Décrire précisément la réserve contractuelle...">${escapeHtml(data.desc||'')}</textarea>
+        <textarea class="r-desc" placeholder="Décrire précisément la réserve...">${escapeHtml(data.desc||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Direction concernée</label>
+        <select class="r-dir">
+          <option value="">— Aucune en particulier —</option>
+          ${visible.map(d => `<option value="${d.id}" ${data.dir===d.id?'selected':''}>${d.code}</option>`).join('')}
+        </select>
       </div>
       <div class="form-group">
         <label>Délai de levée</label>
@@ -2241,7 +2818,6 @@ function addReserve(data = {}) {
       <div class="form-group">
         <label>Statut</label>
         <select class="r-statut">
-          <option value="">Sélectionner...</option>
           <option ${data.statut==='En cours'?'selected':''}>En cours</option>
           <option ${data.statut==='Levée'?'selected':''}>Levée</option>
           <option ${data.statut==='Non engagée'?'selected':''}>Non engagée</option>
@@ -2249,12 +2825,38 @@ function addReserve(data = {}) {
       </div>
     </div>`;
   container.appendChild(div);
-  updateReserveCount();
+  updateCounters();
 }
-function updateReserveCount() {
-  const n = document.querySelectorAll('.reserve-row').length;
-  $('tabReservesNum').textContent = n;
+
+function removeManualReserve(i) {
+  const el = $(`manres_${i}`);
+  if (el) el.remove();
+  // Resync data
+  if (state.currentFiche && state.currentFiche.etabs[state.currentEtab]) {
+    saveManualReserves(state.currentFiche.etabs[state.currentEtab]);
+  }
+  updateCounters();
 }
+
+function saveManualReserves(etab) {
+  if (!etab) return;
+  etab.reservesManual = [];
+  document.querySelectorAll('#reservesManualList .reserve-row').forEach(el => {
+    const desc = el.querySelector('.r-desc')?.value || '';
+    if (!desc.trim()) return; // skip vides
+    etab.reservesManual.push({
+      desc,
+      delai: el.querySelector('.r-delai')?.value || '',
+      statut: el.querySelector('.r-statut')?.value || '',
+      dir: el.querySelector('.r-dir')?.value || '',
+      source: 'manual',
+    });
+  });
+}
+
+// Rétrocompatibilité (anciennes références à addReserve / updateReserveCount)
+function addReserve(data) { addManualReserveRow(data || {}); }
+function updateReserveCount() { updateCounters(); }
 
 // ═══════════════════════════════════════════════════════════════════
 // PROGRESS + RÉCAP
@@ -2286,10 +2888,17 @@ function buildSummary() {
   saveCurrentEtab();
   if (!state.currentFiche) return;
   let totalIssues = 0;
-  let totalReserves = 0;
+  let totalReservesManual = 0;
   state.currentFiche.etabs.forEach(e => {
-    Object.values(e.constats || {}).forEach(c => { if (c.reponse === 'OUI') totalIssues++; });
-    totalReserves += (e.reserves || []).length;
+    ensureConstatStructure(e);
+    DIRECTIONS.forEach(d => {
+      (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+        if (c.freeText) return;
+        const x = (e.constats[d.id] || {})[c.id];
+        if (x && x.reponse === 'OUI') totalIssues++;
+      });
+    });
+    totalReservesManual += (e.reservesManual || []).length;
   });
   const grid = $('summaryGrid');
   const d = $('dateVisite').value;
@@ -2300,7 +2909,7 @@ function buildSummary() {
     <div class="summary-item"><div class="s-label">DRENAET</div><div class="s-value">${escapeHtml(drena)}</div></div>
     <div class="summary-item"><div class="s-label">Établissements</div><div class="s-value">${state.currentFiche.etabs.length}</div></div>
     <div class="summary-item"><div class="s-label">Malfaçons</div><div class="s-value" style="color:var(--red)">${totalIssues}</div></div>
-    <div class="summary-item"><div class="s-label">Réserves</div><div class="s-value">${totalReserves}</div></div>
+    <div class="summary-item"><div class="s-label">Réserves totales</div><div class="s-value">${totalIssues + totalReservesManual}</div></div>
     <div class="summary-item"><div class="s-label">Enquêteur</div><div class="s-value" style="font-size:13px;">${escapeHtml($('nomEnqueteur').value || '—')}</div></div>
   `;
 }
@@ -2339,7 +2948,7 @@ async function doSignIn() {
   // 1. Local first
   const u = state.users.find(x => x.email === email && x.password === pwd);
   if (u) {
-    setSession({ uid: u.id, name: u.name, email: u.email, role: u.role });
+    setSession({ uid: u.id, name: u.name, email: u.email, role: u.role, direction: u.direction || '' });
     toast('Connexion réussie · ' + u.name, 'success');
     return;
   }
@@ -2349,16 +2958,14 @@ async function doSignIn() {
       if (!state.fb) await initFirebase();
       const cred = await window._fb.signInWithEmailAndPassword(state.fb.auth, email, pwd);
       const uid = cred.user.uid;
-      // Try to find user in users collection
       const usrDoc = await window._fb.getDoc(window._fb.doc(state.fb.db, COL.users, uid));
       if (usrDoc.exists()) {
         const u = usrDoc.data();
-        setSession({ uid, name: u.name || email, email, role: u.role || 'user' });
+        setSession({ uid, name: u.name || email, email, role: u.role || 'user', direction: u.direction || '' });
         toast('Connexion Firebase réussie', 'success');
         return;
       }
-      // Sinon créer le compte local
-      setSession({ uid, name: email, email, role: 'user' });
+      setSession({ uid, name: email, email, role: 'user', direction: '' });
       toast('Connexion Firebase réussie', 'success');
       return;
     } catch(e) {
@@ -2374,13 +2981,14 @@ async function doSignUp() {
   const name = $('signupName').value.trim();
   const email = $('signupEmail').value.trim();
   const pwd = $('signupPwd').value;
-  if (!name || !email || !pwd) return toast('Tous les champs sont requis', 'error');
+  const direction = $('signupDir').value;
+  if (!name || !email || !pwd || !direction) return toast('Tous les champs sont requis (dont la direction)', 'error');
   if (pwd.length < 6) return toast('Mot de passe : 6 caractères minimum', 'error');
   if (state.users.some(u => u.email === email)) return toast('Cet email est déjà utilisé', 'error');
   // 1er compte = admin auto
   const isFirst = state.users.length === 0;
   const role = isFirst ? 'admin' : 'user';
-  const u = { id: uuid(), name, email, password: pwd, role, createdAt: new Date().toISOString() };
+  const u = { id: uuid(), name, email, password: pwd, role, direction, createdAt: new Date().toISOString() };
   state.users.push(u);
   saveLocal('users');
   // Firebase si configuré
@@ -2391,18 +2999,18 @@ async function doSignUp() {
       const fbUid = cred.user.uid;
       u.id = fbUid;
       saveLocal('users');
-      await window._fb.setDoc(window._fb.doc(state.fb.db, COL.users, fbUid), { name, email, role, createdAt: u.createdAt });
+      await window._fb.setDoc(window._fb.doc(state.fb.db, COL.users, fbUid), { name, email, role, direction, createdAt: u.createdAt });
     } catch(e) {
       console.warn('FB signup error', e);
       toast('Compte local créé. Erreur Firebase: ' + (e.code || e.message), 'error');
     }
   }
-  setSession({ uid: u.id, name, email, role });
-  toast(`Compte créé · ${isFirst ? 'Administrateur' : 'Utilisateur'}`, 'success');
+  setSession({ uid: u.id, name, email, role, direction });
+  toast(`Compte créé · ${isFirst ? 'Administrateur' : 'Utilisateur'} (${direction.toUpperCase()})`, 'success');
 }
 
 function doGuestSignIn() {
-  setSession({ uid: 'guest_' + uuid().substring(0, 8), name: 'Invité', email: '', role: 'guest' });
+  setSession({ uid: 'guest_' + uuid().substring(0, 8), name: 'Invité', email: '', role: 'guest', direction: 'all' });
 }
 
 function setSession(user) {
@@ -2437,12 +3045,16 @@ function renderUserChip() {
   $('userAvatar').textContent = initials;
   $('userName').textContent = u.name || u.email || 'Utilisateur';
   $('userChip').style.display = '';
+  const dir = DIRECTIONS.find(d => d.id === u.direction);
   if (u.role === 'admin') {
     $('userRoleBadge').style.display = '';
     $('userRoleBadge').textContent = 'ADMIN';
   } else if (u.role === 'guest') {
     $('userRoleBadge').style.display = '';
     $('userRoleBadge').textContent = 'INVITÉ';
+  } else if (dir) {
+    $('userRoleBadge').style.display = '';
+    $('userRoleBadge').textContent = dir.code;
   } else {
     $('userRoleBadge').style.display = 'none';
   }
@@ -2473,7 +3085,14 @@ function canEditFiche(f) {
 // FIREBASE BYOK
 // ═══════════════════════════════════════════════════════════════════
 function getFbConfig() {
-  try { const r = localStorage.getItem(LS.fbConfig); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+  // 1. Config utilisateur en localStorage (prioritaire)
+  try {
+    const r = localStorage.getItem(LS.fbConfig);
+    if (r) return JSON.parse(r);
+  } catch(e) {}
+  // 2. Config par défaut (base en ligne pré-câblée)
+  if (isValidFbConfig(DEFAULT_FB_CONFIG)) return DEFAULT_FB_CONFIG;
+  return null;
 }
 
 async function initFirebase() {
@@ -2658,27 +3277,317 @@ function newFiche() {
 function applyFicheToUI() {
   const f = state.currentFiche;
   if (!f) return;
+  // Migration éventuelle anciennes signatures plates
+  ensureSigStructure(f);
   $('dateVisite').value = f.dateVisite || new Date().toISOString().split('T')[0];
   $('numRapport').value = f.numRapport || '';
   $('heureVisite').value = f.heureVisite || '';
   $('nomEnqueteur').value = f.nomEnqueteur || '';
-  $('sig1Name').value = f.sig1Name || '';
-  $('sig1Titre').value = f.sig1Titre || '';
-  $('sig2Name').value = f.sig2Name || '';
-  $('sig2Etab').value = f.sig2Etab || '';
-  $('sig3Name').value = f.sig3Name || '';
-  $('sig3Entreprise').value = f.sig3Entreprise || '';
   $('ficheStatut').value = f.statut || 'brouillon';
   // DRENA
   document.querySelectorAll('input[name="drena"]').forEach(r => { r.checked = (r.value === f.drena); });
   // Etabs
   if (!f.etabs || !f.etabs.length) f.etabs = [createEtab()];
   state.currentEtab = 0;
+  // Direction initiale = direction de l'utilisateur si pas admin
+  if (state.user && state.user.role !== 'admin' && state.user.direction && state.user.direction !== 'all') {
+    state.currentDir = state.user.direction;
+  }
   renderEtabTabs();
   loadEtab(0);
+  renderSignatures();
   updateProgress();
   updateFicheStatusPill();
   $('hdrFichesCount').textContent = state.fiches.length;
+}
+
+function ensureSigStructure(f) {
+  // Initialiser les signatures de chaque établissement (canvas dataUrl)
+  (f.etabs || []).forEach((e, i) => {
+    ensureConstatStructure(e); // garantit signaturesByDir/sigChef/sigEnt sur l'étab
+    // Migration : si le 1er établissement n'a pas de signature mais f.sigsByDir existait, on migre
+    if (i === 0 && f.sigsByDir) {
+      DIRECTIONS.forEach(d => {
+        const old = f.sigsByDir[d.id];
+        if (old && (old.name || old.fonction) && !e.signaturesByDir[d.id].name) {
+          e.signaturesByDir[d.id].name = old.name || '';
+          e.signaturesByDir[d.id].fonction = old.fonction || '';
+        }
+      });
+      if (f.sigChefName && !e.sigChef.name) e.sigChef.name = f.sigChefName;
+      if (f.sigChefEtab && !e.sigChef.etab) e.sigChef.etab = f.sigChefEtab;
+      if (f.sigEntName && !e.sigEnt.name) e.sigEnt.name = f.sigEntName;
+      if (f.sigEntreprise && !e.sigEnt.entreprise) e.sigEnt.entreprise = f.sigEntreprise;
+    }
+    // Migration ancien format (v2) — sig1Name etc. stockés à la fiche
+    if (i === 0) {
+      if (f.sig1Name && !e.signaturesByDir.dcep.name) e.signaturesByDir.dcep.name = f.sig1Name;
+      if (f.sig1Titre && !e.signaturesByDir.dcep.fonction) e.signaturesByDir.dcep.fonction = f.sig1Titre;
+      if (f.sig2Name && !e.sigChef.name) e.sigChef.name = f.sig2Name;
+      if (f.sig2Etab && !e.sigChef.etab) e.sigChef.etab = f.sig2Etab;
+      if (f.sig3Name && !e.sigEnt.name) e.sigEnt.name = f.sig3Name;
+      if (f.sig3Entreprise && !e.sigEnt.entreprise) e.sigEnt.entreprise = f.sig3Entreprise;
+    }
+  });
+}
+
+function renderSignatures() {
+  const grid = $('signaturesGrid');
+  const f = state.currentFiche;
+  if (!grid || !f) return;
+  ensureSigStructure(f);
+
+  // Si plus d'un étab, ajouter un sélecteur en haut
+  let html = '';
+  if (f.etabs.length > 1) {
+    html += `<div style="grid-column:1/-1;padding:10px 14px;background:linear-gradient(135deg,var(--blue-light),#E0EBFA);border-radius:8px;display:flex;align-items:center;gap:12px;margin-bottom:8px;border-left:4px solid var(--blue);">
+      <span style="font-weight:600;color:var(--blue);">🏫 Signatures pour :</span>
+      <select onchange="switchSigEtab(this.value)" style="flex:1;max-width:400px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-weight:500;">
+        ${f.etabs.map((e, i) => `<option value="${i}" ${i===state.currentEtab?'selected':''}>${escapeHtml(e.college || `Établissement ${i+1}`)}</option>`).join('')}
+      </select>
+      <span style="font-size:11.5px;color:var(--grey);">${state.currentEtab + 1} / ${f.etabs.length}</span>
+    </div>`;
+  }
+
+  const e = f.etabs[state.currentEtab];
+  if (!e) { grid.innerHTML = ''; return; }
+  ensureConstatStructure(e);
+
+  // Une carte par direction (avec canvas signature)
+  DIRECTIONS.forEach(d => {
+    const s = e.signaturesByDir[d.id] || { name:'', fonction:'', dataUrl:'' };
+    const canvasId = `sigCanvas_${d.id}`;
+    html += `<div class="sig-box" style="border-color:${d.color};">
+      <div class="sig-box-header" style="background:${d.color}1A;color:${d.color};">${d.icon} ${escapeHtml(d.code)} — Représentant</div>
+      <div class="sig-box-body">
+        <div class="form-group">
+          <label>Nom & Prénom</label>
+          <input type="text" value="${escapeHtml(s.name)}" oninput="updateEtabSig('${d.id}','name',this.value)">
+        </div>
+        <div class="form-group">
+          <label>Fonction</label>
+          <input type="text" placeholder="ex: Chargé d'Étude" value="${escapeHtml(s.fonction)}" oninput="updateEtabSig('${d.id}','fonction',this.value)">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Signature (souris / tactile)</label>
+          <div class="sig-canvas-wrap ${s.dataUrl ? 'has-signature' : ''}" id="wrap_${canvasId}">
+            <canvas class="sig-canvas" id="${canvasId}" width="500" height="140"></canvas>
+            <div class="sig-canvas-hint">✍️ Dessinez ici votre signature</div>
+            <div class="sig-canvas-actions">
+              <button onclick="clearSigCanvas('${d.id}')">🗑️ Effacer</button>
+              <span style="margin-left:auto;font-size:11px;color:var(--grey);font-style:italic;align-self:center;" id="status_${canvasId}">${s.dataUrl ? '✓ Signée' : 'Non signée'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // Cartes Chef d'établissement et Entreprise
+  html += `<div class="sig-box" style="border-color:var(--gold);">
+    <div class="sig-box-header" style="background:var(--gold-light);color:#8B6914;">🏫 Chef d'Établissement</div>
+    <div class="sig-box-body">
+      <div class="form-group">
+        <label>Nom & Prénom</label>
+        <input type="text" value="${escapeHtml(e.sigChef.name)}" oninput="updateChefSig('name',this.value)" placeholder="Nom complet">
+      </div>
+      <div class="form-group">
+        <label>Établissement</label>
+        <input type="text" value="${escapeHtml(e.sigChef.etab || e.college)}" oninput="updateChefSig('etab',this.value)" placeholder="Nom du collège">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Signature</label>
+        <div class="sig-canvas-wrap ${e.sigChef.dataUrl ? 'has-signature' : ''}" id="wrap_sigCanvas_chef">
+          <canvas class="sig-canvas" id="sigCanvas_chef" width="500" height="140"></canvas>
+          <div class="sig-canvas-hint">✍️ Dessinez ici votre signature</div>
+          <div class="sig-canvas-actions">
+            <button onclick="clearSigCanvas('chef')">🗑️ Effacer</button>
+            <span style="margin-left:auto;font-size:11px;color:var(--grey);font-style:italic;align-self:center;" id="status_sigCanvas_chef">${e.sigChef.dataUrl ? '✓ Signée' : 'Non signée'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  html += `<div class="sig-box" style="border-color:var(--navy);">
+    <div class="sig-box-header" style="background:var(--navy);color:var(--white);">🏗️ Représentant Entreprise</div>
+    <div class="sig-box-body">
+      <div class="form-group">
+        <label>Nom & Prénom</label>
+        <input type="text" value="${escapeHtml(e.sigEnt.name)}" oninput="updateEntSig('name',this.value)" placeholder="Nom complet">
+      </div>
+      <div class="form-group">
+        <label>Entreprise</label>
+        <input type="text" value="${escapeHtml(e.sigEnt.entreprise || e.entreprise)}" oninput="updateEntSig('entreprise',this.value)" placeholder="Raison sociale">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Signature</label>
+        <div class="sig-canvas-wrap ${e.sigEnt.dataUrl ? 'has-signature' : ''}" id="wrap_sigCanvas_ent">
+          <canvas class="sig-canvas" id="sigCanvas_ent" width="500" height="140"></canvas>
+          <div class="sig-canvas-hint">✍️ Dessinez ici votre signature</div>
+          <div class="sig-canvas-actions">
+            <button onclick="clearSigCanvas('ent')">🗑️ Effacer</button>
+            <span style="margin-left:auto;font-size:11px;color:var(--grey);font-style:italic;align-self:center;" id="status_sigCanvas_ent">${e.sigEnt.dataUrl ? '✓ Signée' : 'Non signée'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  grid.innerHTML = html;
+
+  // Initialiser tous les canvas signatures
+  setTimeout(() => {
+    DIRECTIONS.forEach(d => initSignatureCanvas(d.id));
+    initSignatureCanvas('chef');
+    initSignatureCanvas('ent');
+  }, 50);
+}
+
+// Met à jour le state pour les signataires
+function updateEtabSig(dirId, field, value) {
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  e.signaturesByDir[dirId][field] = value;
+}
+function updateChefSig(field, value) {
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  e.sigChef[field] = value;
+}
+function updateEntSig(field, value) {
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (!e) return;
+  ensureConstatStructure(e);
+  e.sigEnt[field] = value;
+}
+
+// Basculer entre établissements pour les signatures
+function switchSigEtab(idx) {
+  const i = parseInt(idx, 10);
+  if (isNaN(i)) return;
+  // Sauver l'étab courant
+  saveCurrentEtab();
+  state.currentEtab = i;
+  loadEtab(i);
+  renderSignatures();
+}
+
+// ─── Canvas signature : initialisation et dessin (souris + tactile) ───
+function initSignatureCanvas(key) {
+  const canvasId = `sigCanvas_${key}`;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const wrap = document.getElementById('wrap_' + canvasId);
+  const statusEl = document.getElementById('status_' + canvasId);
+
+  // Cloner le canvas pour purger d'éventuels anciens listeners (re-render)
+  const newCanvas = canvas.cloneNode(false);
+  canvas.parentNode.replaceChild(newCanvas, canvas);
+  const fresh = newCanvas;
+
+  // Dimensionner pour la netteté (devicePixelRatio)
+  const rect = fresh.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  fresh.width = Math.max(1, Math.floor(rect.width * dpr));
+  fresh.height = Math.max(1, Math.floor(rect.height * dpr));
+  const ctx = fresh.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1B2D4A';
+
+  // Restaurer la signature existante
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (e) {
+    ensureConstatStructure(e);
+    let saved = '';
+    if (key === 'chef') saved = e.sigChef?.dataUrl || '';
+    else if (key === 'ent') saved = e.sigEnt?.dataUrl || '';
+    else saved = e.signaturesByDir?.[key]?.dataUrl || '';
+    if (saved) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        wrap?.classList.add('has-signature');
+      };
+      img.src = saved;
+    }
+  }
+
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+
+  const getPos = (ev) => {
+    const r = fresh.getBoundingClientRect();
+    if (ev.touches && ev.touches.length) {
+      return { x: ev.touches[0].clientX - r.left, y: ev.touches[0].clientY - r.top };
+    }
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  };
+
+  const start = (ev) => {
+    ev.preventDefault();
+    drawing = true;
+    const p = getPos(ev);
+    lastX = p.x; lastY = p.y;
+    wrap?.classList.add('has-signature');
+  };
+  const move = (ev) => {
+    if (!drawing) return;
+    ev.preventDefault();
+    const p = getPos(ev);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    lastX = p.x; lastY = p.y;
+  };
+  const end = () => {
+    if (!drawing) return;
+    drawing = false;
+    const dataUrl = fresh.toDataURL('image/png');
+    const etab = state.currentFiche?.etabs[state.currentEtab];
+    if (etab) {
+      ensureConstatStructure(etab);
+      if (key === 'chef') etab.sigChef.dataUrl = dataUrl;
+      else if (key === 'ent') etab.sigEnt.dataUrl = dataUrl;
+      else etab.signaturesByDir[key].dataUrl = dataUrl;
+      if (statusEl) statusEl.textContent = '✓ Signée';
+      saveFicheNow(true);
+    }
+  };
+
+  fresh.addEventListener('mousedown', start);
+  fresh.addEventListener('mousemove', move);
+  fresh.addEventListener('mouseup', end);
+  fresh.addEventListener('mouseleave', end);
+  fresh.addEventListener('touchstart', start, { passive: false });
+  fresh.addEventListener('touchmove', move, { passive: false });
+  fresh.addEventListener('touchend', end);
+}
+
+function clearSigCanvas(key) {
+  const canvasId = `sigCanvas_${key}`;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const wrap = document.getElementById('wrap_' + canvasId);
+  wrap?.classList.remove('has-signature');
+  const statusEl = document.getElementById('status_' + canvasId);
+  if (statusEl) statusEl.textContent = 'Non signée';
+  const e = state.currentFiche?.etabs[state.currentEtab];
+  if (e) {
+    ensureConstatStructure(e);
+    if (key === 'chef') e.sigChef.dataUrl = '';
+    else if (key === 'ent') e.sigEnt.dataUrl = '';
+    else if (e.signaturesByDir[key]) e.signaturesByDir[key].dataUrl = '';
+    saveFicheNow(true);
+  }
 }
 
 function collectFicheFromUI() {
@@ -2690,12 +3599,6 @@ function collectFicheFromUI() {
   f.heureVisite = $('heureVisite').value;
   f.nomEnqueteur = $('nomEnqueteur').value;
   f.drena = document.querySelector('input[name="drena"]:checked')?.value || '';
-  f.sig1Name = $('sig1Name').value;
-  f.sig1Titre = $('sig1Titre').value;
-  f.sig2Name = $('sig2Name').value;
-  f.sig2Etab = $('sig2Etab').value;
-  f.sig3Name = $('sig3Name').value;
-  f.sig3Entreprise = $('sig3Entreprise').value;
   f.statut = $('ficheStatut').value;
   f.updatedAt = new Date().toISOString();
   return f;
@@ -2805,11 +3708,15 @@ function loadFicheFromList(id) {
 // PARAMS MODAL
 // ═══════════════════════════════════════════════════════════════════
 function openParamsModal() {
-  // Charger valeurs actuelles
-  const cfg = getFbConfig();
-  $('fbConfigInput').value = cfg ? JSON.stringify(cfg, null, 2) : '';
-  $('aiKeyInput').value = localStorage.getItem(LS.aiKey) || '';
-  $('aiModelInput').value = localStorage.getItem(LS.aiModel) || 'claude-sonnet-4-6';
+  // Charger config actuelle
+  let userCfg = null;
+  try { userCfg = JSON.parse(localStorage.getItem(LS.fbConfig) || 'null'); } catch(e) {}
+  const usingDefault = !userCfg && isValidFbConfig(DEFAULT_FB_CONFIG);
+  const banner = $('fbDefaultBanner');
+  if (banner) banner.style.display = usingDefault ? '' : 'none';
+  // Pré-remplir : config user > config défaut > vide
+  const effective = userCfg || (isValidFbConfig(DEFAULT_FB_CONFIG) ? DEFAULT_FB_CONFIG : null);
+  $('fbConfigInput').value = effective ? JSON.stringify(effective, null, 2) : '';
   // Visibilité admin
   if (isAdmin()) {
     $('usersAdminOnly').style.display = '';
@@ -2823,20 +3730,26 @@ function openParamsModal() {
   openModal('modalParams');
 }
 
+// Remettre la config par défaut (efface l'override utilisateur)
+async function restoreDefaultFbConfig() {
+  if (!isValidFbConfig(DEFAULT_FB_CONFIG)) {
+    toast('Aucune configuration officielle disponible', 'error');
+    return;
+  }
+  if (!confirm('Restaurer la configuration Firebase officielle MENAET ? Votre configuration personnelle sera supprimée.')) return;
+  localStorage.removeItem(LS.fbConfig);
+  $('fbConfigInput').value = JSON.stringify(DEFAULT_FB_CONFIG, null, 2);
+  $('fbDefaultBanner').style.display = '';
+  state.fb = null;
+  await initFirebase();
+  toast('Configuration officielle restaurée', 'success');
+}
+
 function switchParamTab(tab) {
   document.querySelectorAll('.login-tab[data-paramtab]').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.param-pane').forEach(p => p.style.display = 'none');
   document.querySelector(`.login-tab[data-paramtab="${tab}"]`).classList.add('active');
   $('paramPane' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = '';
-}
-
-function saveAiKey() {
-  const k = $('aiKeyInput').value.trim();
-  const m = $('aiModelInput').value;
-  if (k) localStorage.setItem(LS.aiKey, k);
-  else localStorage.removeItem(LS.aiKey);
-  localStorage.setItem(LS.aiModel, m);
-  toast('Clé IA enregistrée', 'success');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2848,15 +3761,16 @@ function renderRepertoireTable() {
   $('cdpCount').textContent = state.repertoire.length;
   $('metaCdpCount').textContent = state.repertoire.length;
   if (!state.repertoire.length) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Aucun établissement</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty">Aucun établissement</div></td></tr>`;
     return;
   }
   tbody.innerHTML = state.repertoire.map(c => `
     <tr>
       <td><strong>${escapeHtml(c.nom)}</strong><br><span style="font-size:11px;color:var(--grey);">${escapeHtml(c.localite || '')}</span></td>
-      <td>${escapeHtml(c.chef || '—')}</td>
+      <td>${escapeHtml(c.chef || '—')}<br><span style="font-size:11px;color:var(--grey);">${escapeHtml(c.fonction || '—')}</span></td>
       <td>${escapeHtml(c.drena || '—')}</td>
       <td><span style="font-size:12px;">${escapeHtml(c.tel || '—')}</span></td>
+      <td><span style="font-size:11px;color:var(--grey);">${escapeHtml(c.email || '—')}</span></td>
       <td>
         <button class="btn" style="padding:4px 8px;font-size:11px;" onclick="editCdp('${c.id}')">✎</button>
       </td>
@@ -2947,16 +3861,20 @@ function renderUsersTable() {
   const tbody = $('usersBody');
   if (!tbody) return;
   if (!state.users.length) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty">Aucun utilisateur</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Aucun utilisateur</div></td></tr>`;
     return;
   }
-  tbody.innerHTML = state.users.map(u => `
+  tbody.innerHTML = state.users.map(u => {
+    const dir = DIRECTIONS.find(d => d.id === u.direction);
+    return `
     <tr>
       <td><strong>${escapeHtml(u.name)}</strong></td>
       <td><span style="font-size:12px;">${escapeHtml(u.email)}</span></td>
-      <td><span class="badge ${u.role === 'admin' ? 'validee' : 'soumise'}">${u.role.toUpperCase()}</span></td>
+      <td>${dir ? `<span class="badge soumise">${escapeHtml(dir.code)}</span>` : '<span style="color:var(--grey);">—</span>'}</td>
+      <td><span class="badge ${u.role === 'admin' ? 'validee' : 'brouillon'}">${u.role.toUpperCase()}</span></td>
       <td><button class="btn" style="padding:4px 8px;font-size:11px;" onclick="editUser('${u.id}')">✎</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function openUserAddModal() {
@@ -2964,6 +3882,7 @@ function openUserAddModal() {
   $('modalUserTitle').textContent = 'Nouvel utilisateur';
   ['usrName','usrEmail','usrPwd'].forEach(id => $(id).value = '');
   $('usrRole').value = 'user';
+  $('usrDir').value = '';
   $('usrDeleteBtn').style.display = 'none';
   openModal('modalUser');
 }
@@ -2977,6 +3896,7 @@ function editUser(id) {
   $('usrEmail').value = u.email || '';
   $('usrPwd').value = u.password || '';
   $('usrRole').value = u.role || 'user';
+  $('usrDir').value = u.direction || '';
   $('usrDeleteBtn').style.display = (u.id !== state.user.uid) ? '' : 'none';
   openModal('modalUser');
 }
@@ -2986,19 +3906,20 @@ function saveUser() {
   const email = $('usrEmail').value.trim();
   const pwd = $('usrPwd').value;
   const role = $('usrRole').value;
-  if (!name || !email || !pwd) return toast('Champs requis', 'error');
+  const direction = $('usrDir').value;
+  if (!name || !email || !pwd || !direction) return toast('Champs requis (dont direction)', 'error');
   let u;
   if (state.editingUserId) {
     u = state.users.find(x => x.id === state.editingUserId);
-    Object.assign(u, { name, email, password: pwd, role });
+    Object.assign(u, { name, email, password: pwd, role, direction });
   } else {
     if (state.users.some(x => x.email === email)) return toast('Email déjà utilisé', 'error');
-    u = { id: uuid(), name, email, password: pwd, role, createdAt: new Date().toISOString() };
+    u = { id: uuid(), name, email, password: pwd, role, direction, createdAt: new Date().toISOString() };
     state.users.push(u);
   }
   saveLocal('users');
   if (state.fb) {
-    window._fb.setDoc(window._fb.doc(state.fb.db, COL.users, u.id), { name, email, role, createdAt: u.createdAt || new Date().toISOString() }).catch(console.warn);
+    window._fb.setDoc(window._fb.doc(state.fb.db, COL.users, u.id), { name, email, role, direction, createdAt: u.createdAt || new Date().toISOString() }).catch(console.warn);
   }
   renderUsersTable();
   closeModal('modalUser');
@@ -3118,31 +4039,44 @@ function exportExcel() {
   collectFicheFromUI();
   const f = state.currentFiche;
   if (!f) return;
-  const rows = [['N° Rapport','Date','DRENAET','Établissement','Chef','Catégorie','Constat','Réponse','Description','Nb photos']];
+  // Onglet Constats - toutes directions
+  const rows = [['N° Rapport','Date','DRENAET','Établissement','Chef','Direction','Catégorie','Constat','Réponse','Description','Nb photos']];
   f.etabs.forEach(e => {
-    CONSTATS_LIST.forEach(c => {
-      const x = (e.constats || {})[c.id] || {};
-      rows.push([
-        f.numRapport || '',
-        f.dateVisite || '',
-        f.drena || '',
-        e.college || '',
-        e.chef || '',
-        c.cat,
-        c.label,
-        x.reponse || '',
-        x.description || '',
-        (x.photos || []).length,
-      ]);
-    });
-    (e.autresConstats || []).forEach((desc, i) => {
-      rows.push([f.numRapport || '', f.dateVisite || '', f.drena || '', e.college || '', e.chef || '', 'Autre', `Constat additionnel ${i+1}`, 'OUI', desc, 0]);
+    ensureConstatStructure(e);
+    DIRECTIONS.forEach(d => {
+      (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+        const x = (e.constats[d.id] || {})[c.id] || {};
+        rows.push([
+          f.numRapport || '', f.dateVisite || '', f.drena || '', e.college || '', e.chef || '',
+          d.code, c.cat, c.label, x.reponse || '', x.description || '', (x.photos || []).length,
+        ]);
+      });
+      // Autres constats
+      ((e.autresConstats && e.autresConstats[d.id]) || []).forEach((desc, i) => {
+        rows.push([f.numRapport || '', f.dateVisite || '', f.drena || '', e.college || '', e.chef || '', d.code, 'Autre', `Constat additionnel ${i+1}`, 'OUI', desc, 0]);
+      });
     });
   });
-  // Sheet réserves
-  const rRows = [['Établissement','Description','Délai','Statut']];
-  f.etabs.forEach(e => {
-    (e.reserves || []).forEach(r => rRows.push([e.college || '', r.desc, r.delai, r.statut]));
+  // Onglet Réserves (auto + manuelles)
+  const rRows = [['Type','Établissement','Direction','N°','Constat origine','Description','Délai','Statut']];
+  let n = 0;
+  f.etabs.forEach((e, etabIdx) => {
+    DIRECTIONS.forEach(d => {
+      (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+        if (c.freeText) return; // pas de réserve sur champ libre
+        const x = (e.constats[d.id] || {})[c.id] || {};
+        if (x.reponse === 'OUI') {
+          n++;
+          const key = `auto_${etabIdx}_${d.id}_${c.id}`;
+          const o = (f.reservesOverrides || {})[key] || {};
+          rRows.push(['Auto', e.college || '', d.code, 'R' + n, c.label, x.description || '', o.delai || getDefaultReserveDelay(c.cat), o.statut || 'En cours']);
+        }
+      });
+    });
+    (e.reservesManual || []).forEach((r, i) => {
+      const dir = DIRECTIONS.find(x => x.id === r.dir);
+      rRows.push(['Manuelle', e.college || '', dir ? dir.code : '—', 'M' + (i+1), '—', r.desc, r.delai, r.statut]);
+    });
   });
   const ws1 = XLSX.utils.aoa_to_sheet(rows);
   const ws2 = XLSX.utils.aoa_to_sheet(rRows);
@@ -3155,87 +4089,196 @@ function exportExcel() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// IA — RAPPORT RÉDIGÉ
+// GÉNÉRATEUR DE RAPPORT — Templating LOCAL (sans API)
 // ═══════════════════════════════════════════════════════════════════
-async function generateAiReport() {
-  const key = localStorage.getItem(LS.aiKey);
-  if (!key) {
-    toast('Clé API Anthropic manquante. Ouvrez Paramètres ⚙️.', 'error');
-    return;
-  }
+function generateAiReport() {
   collectFicheFromUI();
   const f = state.currentFiche;
   if (!f) return;
-  const model = localStorage.getItem(LS.aiModel) || 'claude-sonnet-4-6';
-
-  // Construire le contexte
-  const ctx = {
-    date: f.dateVisite, drena: f.drena, numRapport: f.numRapport,
-    enqueteur: f.nomEnqueteur, etabsCount: f.etabs.length,
-    etabs: f.etabs.map(e => ({
-      college: e.college, chef: e.chef, entreprise: e.entreprise,
-      localite: e.localite, etatGlobal: e.etatGlobal, fonctionnalite: e.fonctionnalite,
-      observations: e.observations, recommandations: e.recommandations,
-      constats_OUI: CONSTATS_LIST.filter(c => (e.constats||{})[c.id]?.reponse === 'OUI').map(c => ({
-        constat: c.label, categorie: c.cat, description: (e.constats[c.id].description || '') })),
-      autresConstats: e.autresConstats || [],
-      reserves: e.reserves || [],
-    })),
-  };
-
-  const prompt = `Tu es un rédacteur de rapports techniques institutionnels pour la Direction de la Construction et des Équipements Pédagogiques (DCEP) du Ministère de l'Éducation Nationale, de l'Alphabétisation et de l'Enseignement Technique de Côte d'Ivoire.
-
-Rédige un rapport de visite technique post-réception provisoire complet et professionnel à partir des constats ci-dessous. Le ton doit être institutionnel formel français, structuré avec sections (Introduction, Identification des établissements visités, Méthodologie, Constats techniques par catégorie, Observations générales, Réserves notifiées, Conclusion et recommandations).
-
-DONNÉES DE LA MISSION :
-${JSON.stringify(ctx, null, 2)}
-
-Consignes de rédaction :
-- Rédige des paragraphes narratifs, pas de listes à puces sauf si nécessaire
-- Mentionne explicitement chaque établissement avec son chef
-- Pour les malfaçons constatées, indique la catégorie technique (Gros œuvre, Second œuvre, VRD, Équipements, Aménagements) et reformule la description
-- Termine par une section "Recommandations opérationnelles" avec actions prioritaires
-- N'invente aucune donnée absente du contexte
-- Longueur : 600 à 900 mots
-- N'utilise PAS de markdown (pas de **gras**, pas de #titres) — texte brut prêt à intégrer dans un document Word`;
 
   $('aiOutput').style.display = '';
-  $('aiOutput').innerHTML = '<div class="ai-spinner"></div><div style="text-align:center;color:var(--grey);font-size:13px;">L\'IA rédige votre rapport...</div>';
+  $('aiOutput').innerHTML = '<div class="ai-spinner"></div><div style="text-align:center;color:var(--grey);font-size:13px;">Composition du rapport en cours…</div>';
   $('btnDlAi').style.display = 'none';
+  $('btnDlAiPdf').style.display = 'none';
 
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model, max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }],
-      })
+  // Délai cosmétique pour donner l'impression d'une vraie génération
+  setTimeout(() => {
+    try {
+      const text = composeReportText(f);
+      state.currentFiche.aiReport = text;
+      $('aiOutput').textContent = text;
+      $('btnDlAi').style.display = '';
+      $('btnDlAiPdf').style.display = '';
+      saveFicheNow(true);
+      toast('Rapport composé avec succès', 'success');
+    } catch(e) {
+      console.error(e);
+      $('aiOutput').innerHTML = `<div style="color:var(--red);">Erreur : ${escapeHtml(e.message)}</div>`;
+      toast('Erreur génération : ' + e.message, 'error');
+    }
+  }, 400);
+}
+
+// Compose un rapport narratif à partir des constats (templating local)
+function composeReportText(f) {
+  const dateStr = f.dateVisite ? new Date(f.dateVisite + 'T00:00:00').toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}) : '—';
+  const drena = f.drena || 'San Pédro';
+  const enq = f.nomEnqueteur || 'l\'équipe désignée';
+  const numR = f.numRapport || 'En cours d\'attribution';
+  const nbEtabs = f.etabs.length;
+
+  const parts = [];
+
+  // ─── 1. INTRODUCTION ───
+  parts.push(`I. INTRODUCTION
+
+Le présent rapport rend compte de la mission conjointe de visite technique préalable à la réception définitive des Collèges de Proximité (CDP) de la région de San Pédro, conduite le ${dateStr} sous la coordination de ${enq}. Cette mission s'inscrit dans le cadre du suivi post-réception provisoire des infrastructures éducatives construites pour le compte du Ministère de l'Éducation Nationale, de l'Alphabétisation et de l'Enseignement Technique (MENAET).
+
+La mission a mobilisé six directions techniques du Ministère — la DCEP (construction et équipements pédagogiques), la DESPS (digitalisation et statistiques), la DAF (affaires financières), la DAPS-COGES (vie scolaire et gouvernance communautaire), la SGP (secrétariat général et patrimoine) et la DRH (ressources humaines) — afin d'évaluer chaque établissement sous l'angle des compétences spécifiques à chacune. Au total, ${nbEtabs} établissement${nbEtabs>1?'s ont été visités':' a été visité'} dans le cadre de la présente fiche (rapport n° ${numR}).`);
+
+  // ─── 2. IDENTIFICATION ÉTABLISSEMENTS ───
+  parts.push(`II. IDENTIFICATION DES ÉTABLISSEMENTS VISITÉS
+
+${f.etabs.map((e, i) => {
+  const college = e.college || `Établissement n°${i+1}`;
+  const localite = e.localite || 'localité non précisée';
+  const chef = e.chef || 'chef d\'établissement non communiqué';
+  const ent = e.entreprise || 'entreprise non communiquée';
+  return `${i+1}. ${college} (localité de ${localite}), placé sous la responsabilité de ${chef}, construit par l'entreprise ${ent}.`;
+}).join('\n')}`);
+
+  // ─── 3. MÉTHODOLOGIE ───
+  parts.push(`III. MÉTHODOLOGIE DE LA VISITE CONJOINTE
+
+La visite a été conduite selon une grille structurée commune à toutes les directions, déclinée en questionnaires spécifiques par champ de compétence. Pour chaque constat, les enquêteurs ont indiqué une réponse OUI (malfaçon ou non-conformité avérée) ou NON (conformité avérée), accompagnée d'une description technique et, le cas échéant, de photographies probantes. Les constats positifs (OUI) ont été automatiquement convertis en réserves contractuelles à notifier à l'entreprise constructrice, avec un délai indicatif de levée fonction de la nature de l'anomalie.
+
+DRENAET de rattachement : ${drena}. La présente fiche couvre ${nbEtabs} établissement${nbEtabs>1?'s':''}.`);
+
+  // ─── 4. CONSTATS PAR DIRECTION ───
+  let constatsSection = `IV. CONSTATS TECHNIQUES PAR DIRECTION\n`;
+
+  DIRECTIONS.forEach(d => {
+    const list = CONSTATS_BY_DIR[d.id] || [];
+    const dirName = d.label.split('—')[1]?.trim() || d.code;
+
+    // Agréger tous les constats OUI de tous les établissements pour cette direction
+    let allIssues = [];
+    let allOk = 0;
+    let freeTextAnswers = [];
+    let allAutres = [];
+
+    f.etabs.forEach((e, eIdx) => {
+      const cstDir = (e.constats && e.constats[d.id]) || {};
+      list.forEach(c => {
+        const x = cstDir[c.id];
+        if (!x) return;
+        if (c.freeText) {
+          if ((x.description || '').trim()) {
+            freeTextAnswers.push({ etab: e.college || `Étab. ${eIdx+1}`, question: c.label, reponse: x.description });
+          }
+        } else {
+          if (x.reponse === 'OUI') {
+            allIssues.push({ etab: e.college || `Étab. ${eIdx+1}`, constat: c.label, cat: c.cat, desc: x.description || '' });
+          } else if (x.reponse === 'NON') {
+            allOk++;
+          }
+        }
+      });
+      const autres = ((e.autresConstats || {})[d.id] || []).filter(s => s.trim());
+      autres.forEach(a => allAutres.push({ etab: e.college || `Étab. ${eIdx+1}`, desc: a }));
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error?.message || ('HTTP ' + resp.status));
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
-    state.currentFiche.aiReport = text;
-    $('aiOutput').textContent = text;
-    $('btnDlAi').style.display = '';
-    saveFicheNow(true);
-    toast('Rapport IA généré', 'success');
-  } catch(e) {
-    console.error(e);
-    $('aiOutput').innerHTML = `<div style="color:var(--red);">Erreur : ${escapeHtml(e.message)}</div>`;
-    toast('Erreur IA : ' + e.message, 'error');
+
+    if (!allIssues.length && !freeTextAnswers.length && !allAutres.length && allOk === 0) {
+      return; // skip cette direction si aucune donnée saisie
+    }
+
+    constatsSection += `\n${d.code} — ${dirName}\n`;
+    constatsSection += `${'─'.repeat(50)}\n`;
+
+    if (allIssues.length === 0 && allAutres.length === 0 && freeTextAnswers.length === 0 && allOk > 0) {
+      constatsSection += `Les vérifications de la direction ${d.code} n'ont relevé aucune malfaçon : ${allOk} constat${allOk>1?'s sont':' est'} conforme${allOk>1?'s':''}.\n`;
+    } else {
+      if (allIssues.length > 0) {
+        constatsSection += `${allIssues.length} non-conformité${allIssues.length>1?'s ont':' a'} été relevée${allIssues.length>1?'s':''} au titre des compétences ${d.code}`;
+        if (allOk > 0) constatsSection += `, contre ${allOk} constat${allOk>1?'s':''} conforme${allOk>1?'s':''}`;
+        constatsSection += '.\n\n';
+        // Détailler
+        allIssues.forEach((iss, i) => {
+          constatsSection += `• [${iss.etab}] ${iss.constat} (${iss.cat})`;
+          if (iss.desc.trim()) constatsSection += ` : ${iss.desc.trim()}`;
+          constatsSection += '.\n';
+        });
+      }
+      if (allAutres.length > 0) {
+        constatsSection += `\nConstats additionnels signalés par les enquêteurs :\n`;
+        allAutres.forEach(a => constatsSection += `• [${a.etab}] ${a.desc.trim()}.\n`);
+      }
+      if (freeTextAnswers.length > 0) {
+        constatsSection += `\nRéponses aux questions ouvertes :\n`;
+        freeTextAnswers.forEach(q => {
+          constatsSection += `• [${q.etab}] ${q.question} → ${q.reponse.trim()}\n`;
+        });
+      }
+    }
+  });
+
+  parts.push(constatsSection);
+
+  // ─── 5. RÉSERVES ───
+  let nReserves = 0;
+  let nReservesMan = 0;
+  f.etabs.forEach(e => {
+    DIRECTIONS.forEach(d => {
+      (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+        if (c.freeText) return;
+        const x = ((e.constats || {})[d.id] || {})[c.id];
+        if (x && x.reponse === 'OUI') nReserves++;
+      });
+    });
+    nReservesMan += (e.reservesManual || []).length;
+  });
+  const totalReserves = nReserves + nReservesMan;
+  let reservesText = `V. RÉSERVES NOTIFIÉES\n\n`;
+  if (totalReserves === 0) {
+    reservesText += `Aucune réserve n'a été notifiée à l'issue de la mission. Les établissements visités sont jugés conformes au cahier des charges contractuel et peuvent être réceptionnés définitivement sous réserve de la validation hiérarchique.`;
+  } else {
+    reservesText += `${totalReserves} réserve${totalReserves>1?'s sont':' est'} notifiée${totalReserves>1?'s':''} à l'entreprise constructrice à l'issue de la mission, dont ${nReserves} générée${nReserves>1?'s':''} automatiquement à partir des constats OUI et ${nReservesMan} ajoutée${nReservesMan>1?'s':''} manuellement par les enquêteurs. Chaque réserve fait l'objet d'un délai indicatif de levée (15 jours pour le gros œuvre et les questions de sécurité, 30 jours pour les autres natures de travaux). Le tableau détaillé des réserves est annexé au présent rapport.`;
   }
+  parts.push(reservesText);
+
+  // ─── 6. CONCLUSION ───
+  let etatLine = '';
+  const etats = f.etabs.map(e => e.etatGlobal).filter(x => x);
+  if (etats.length) {
+    etatLine = `\n\nL'état global des établissements visités est apprécié comme suit : ${etats.join(' ; ')}.`;
+  }
+  const obs = f.etabs.map(e => e.observations).filter(x => x && x.trim());
+  const reco = f.etabs.map(e => e.recommandations).filter(x => x && x.trim());
+
+  let conclusion = `VI. CONCLUSION ET RECOMMANDATIONS OPÉRATIONNELLES
+
+La mission conjointe inter-directions a permis d'établir un diagnostic technique exhaustif des ${nbEtabs} établissement${nbEtabs>1?'s':''} visité${nbEtabs>1?'s':''} dans le cadre du programme de construction des Collèges de Proximité de la région de ${drena}.${etatLine}
+
+${totalReserves === 0
+  ? `Aucune réserve n'ayant été notifiée, la réception définitive des établissements peut être engagée selon le calendrier prévu.`
+  : `Les ${totalReserves} réserve${totalReserves>1?'s notifiées appellent':' notifiée appelle'} une action diligente de l'entreprise constructrice, sous la supervision conjointe de la DCEP et des directions partenaires concernées. La levée effective des réserves conditionne la réception définitive.`}`;
+
+  if (obs.length) {
+    conclusion += `\n\nObservations complémentaires des enquêteurs :\n${obs.map(o => '• ' + o.trim()).join('\n')}`;
+  }
+  if (reco.length) {
+    conclusion += `\n\nRecommandations opérationnelles :\n${reco.map(r => '• ' + r.trim()).join('\n')}`;
+  }
+  conclusion += `\n\nRapport établi sous la responsabilité de ${enq} (rapport n° ${numR}) le ${dateStr}, à l'attention de la hiérarchie du MENAET.`;
+  parts.push(conclusion);
+
+  return parts.join('\n\n');
 }
 
 async function downloadAiReportDocx() {
   if (!state.currentFiche || !state.currentFiche.aiReport) return;
   if (!window.docx) return toast('Bibliothèque docx non chargée', 'error');
-  const { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } = docx;
+  const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
   const f = state.currentFiche;
   const paragraphs = [
     new Paragraph({
@@ -3245,7 +4288,12 @@ async function downloadAiReportDocx() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'DCEP / MENAET · République de Côte d\'Ivoire', italics: true, size: 20, font: 'Arial', color: '666666' })],
+      children: [new TextRun({ text: 'Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH — MENAET', italics: true, size: 20, font: 'Arial', color: '666666' })],
+      spacing: { after: 200 },
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: 'République de Côte d\'Ivoire', italics: true, size: 18, font: 'Arial', color: '888888' })],
       spacing: { after: 400 },
     }),
     new Paragraph({
@@ -3253,22 +4301,140 @@ async function downloadAiReportDocx() {
       spacing: { after: 300 },
     }),
   ];
-  // Split AI text into paragraphs
   f.aiReport.split(/\n\n+/).forEach(p => {
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: p.trim(), size: 22, font: 'Arial' })],
-      spacing: { after: 200, line: 320 },
-      alignment: AlignmentType.JUSTIFIED,
-    }));
+    const txt = p.trim();
+    if (!txt) return;
+    // Détection des titres de section (commencent par I., II., etc.)
+    const isHeading = /^(I{1,3}V?I*|VI|V|IV|III|II|I)\.\s+[A-ZÉÈÊÀ]/.test(txt);
+    if (isHeading) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ text: txt.split('\n')[0], bold: true, size: 26, font: 'Arial', color: '1F3864' })],
+        spacing: { before: 300, after: 200 },
+      }));
+      // Reste du paragraphe (après le titre)
+      const rest = txt.split('\n').slice(1).join('\n').trim();
+      if (rest) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: rest, size: 22, font: 'Arial' })],
+          spacing: { after: 200, line: 320 },
+          alignment: AlignmentType.JUSTIFIED,
+        }));
+      }
+    } else {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ text: txt, size: 22, font: 'Arial' })],
+        spacing: { after: 200, line: 320 },
+        alignment: AlignmentType.JUSTIFIED,
+      }));
+    }
   });
   const doc = new Document({ sections: [{ children: paragraphs }] });
   const buf = await Packer.toBuffer(doc);
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `Rapport_IA_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.docx`;
+  a.href = url;
+  a.download = `Rapport_Auto_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.docx`;
   a.click();
   URL.revokeObjectURL(url);
+  toast('Word téléchargé', 'success');
+}
+
+// Export PDF via jsPDF (chargé en CDN)
+async function downloadAiReportPdf() {
+  if (!state.currentFiche || !state.currentFiche.aiReport) return;
+  if (!window.jspdf) {
+    // Charger jsPDF dynamiquement si absent
+    toast('Chargement de la bibliothèque PDF…', 'success');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  if (!window.jspdf) return toast('Impossible de charger jsPDF', 'error');
+  const { jsPDF } = window.jspdf;
+  const f = state.currentFiche;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const margin = 18, pageWidth = 210, pageHeight = 297, usable = pageWidth - 2*margin;
+  let y = margin;
+
+  // En-tête
+  doc.setFillColor(31, 56, 100);
+  doc.rect(0, 0, pageWidth, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold').setFontSize(14);
+  doc.text('RAPPORT DE VISITE TECHNIQUE — CDP', pageWidth/2, 12, { align: 'center' });
+  doc.setFont('helvetica', 'italic').setFontSize(9);
+  doc.text('Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', pageWidth/2, 18, { align: 'center' });
+  doc.text('MENAET — République de Côte d\'Ivoire', pageWidth/2, 23, { align: 'center' });
+  y = 38;
+
+  // Métadonnées
+  doc.setTextColor(0, 0, 0).setFont('helvetica', 'normal').setFontSize(10);
+  doc.text(`N° Rapport : ${f.numRapport || '—'}   ·   Date : ${fmtDate(f.dateVisite)}   ·   DRENAET : ${f.drena || '—'}`, margin, y);
+  y += 6;
+  doc.setDrawColor(31, 56, 100).setLineWidth(0.4);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 6;
+
+  // Corps : itérer paragraphes
+  const text = f.aiReport;
+  const blocks = text.split(/\n\n+/);
+  blocks.forEach(block => {
+    const txt = block.trim();
+    if (!txt) return;
+    const lines = txt.split('\n');
+    const firstLine = lines[0];
+    const isHeading = /^(I{1,3}V?I*|VI|V|IV|III|II|I)\.\s+[A-ZÉÈÊÀ]/.test(firstLine);
+
+    if (isHeading) {
+      if (y > pageHeight - 30) { doc.addPage(); y = margin; }
+      doc.setFont('helvetica', 'bold').setFontSize(12).setTextColor(31, 56, 100);
+      doc.text(firstLine, margin, y);
+      y += 7;
+      const rest = lines.slice(1).join('\n').trim();
+      if (rest) {
+        doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+        const wrapped = doc.splitTextToSize(rest, usable);
+        wrapped.forEach(line => {
+          if (y > pageHeight - 20) { doc.addPage(); y = margin; }
+          doc.text(line, margin, y);
+          y += 5;
+        });
+        y += 3;
+      }
+    } else {
+      doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
+      const wrapped = doc.splitTextToSize(txt, usable);
+      wrapped.forEach(line => {
+        if (y > pageHeight - 20) { doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += 5;
+      });
+      y += 3;
+    }
+  });
+
+  // Pied de page sur chaque page
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8).setTextColor(150, 150, 150).setFont('helvetica', 'italic');
+    doc.text(`MENAET · Mission CDP San Pédro · Page ${i} / ${total}`, pageWidth/2, pageHeight - 8, { align: 'center' });
+  }
+
+  const fname = `Rapport_Auto_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.pdf`;
+  doc.save(fname);
+  toast('PDF téléchargé', 'success');
+}
+
+// Helper pour charger un script CDN dynamiquement
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
 }
 </script>
 <script>
@@ -3294,6 +4460,12 @@ async function generateReport() {
   const GREEN_C   = '1A7A3A';
   const WHITE     = 'FFFFFF';
 
+  // Couleurs hex sans # pour docx
+  const dirColorHex = (id) => {
+    const d = DIRECTIONS.find(x => x.id === id);
+    return d ? d.color.replace('#', '') : BLUE_MED;
+  };
+
   const bdr = (color='AAAAAA') => ({ style: BorderStyle.SINGLE, size: 1, color });
   const bdrs = (c='AAAAAA') => ({ top: bdr(c), bottom: bdr(c), left: bdr(c), right: bdr(c) });
   const noBdr = () => ({ style: BorderStyle.NONE, size: 0, color: 'FFFFFF' });
@@ -3318,7 +4490,6 @@ async function generateReport() {
 
   const blank = () => p('');
 
-  // Helper photo → ImageRun
   function makePhotoParagraph(dataUrl, label) {
     try {
       const base64 = dataUrl.split(',')[1];
@@ -3343,6 +4514,7 @@ async function generateReport() {
   const sections = [];
 
   f.etabs.forEach((etab, etabIdx) => {
+    ensureConstatStructure(etab);
     const college = etab.college || `Établissement ${etabIdx+1}`;
     const chef = etab.chef || '_______________';
     const contacts = etab.contacts || '_______________';
@@ -3350,36 +4522,47 @@ async function generateReport() {
     const repEntreprise = etab.repEntreprise || '_______________';
     const localite = etab.localite || '_______________';
 
-    const issues = Object.values(etab.constats || {}).filter(c => c.reponse === 'OUI');
-    const constOk = Object.values(etab.constats || {}).filter(c => c.reponse === 'NON');
+    // Comptes par direction
+    let totalIssues = 0, totalOk = 0;
+    DIRECTIONS.forEach(d => {
+      (CONSTATS_BY_DIR[d.id] || []).forEach(c => {
+        if (c.freeText) return;
+        const x = (etab.constats[d.id] || {})[c.id];
+        if (!x) return;
+        if (x.reponse === 'OUI') totalIssues++;
+        else if (x.reponse === 'NON') totalOk++;
+      });
+    });
 
-    // Photos pour ce CDP (toutes les photos OUI à insérer dans une section dédiée)
+    // Photos pour ce CDP (toutes les directions)
     const photoBlocks = [];
-    CONSTATS_LIST.forEach((c, i) => {
-      const saved = (etab.constats || {})[c.id] || {};
-      if (saved.reponse === 'OUI' && (saved.photos || []).length) {
-        saved.photos.forEach((dataUrl, pi) => {
-          photoBlocks.push(makePhotoParagraph(dataUrl, `Constat ${i+1} – ${c.label} (photo ${pi+1})`));
-        });
-      }
+    DIRECTIONS.forEach(d => {
+      const list = CONSTATS_BY_DIR[d.id] || [];
+      list.forEach((c, i) => {
+        const saved = (etab.constats[d.id] || {})[c.id] || {};
+        if (saved.reponse === 'OUI' && (saved.photos || []).length) {
+          saved.photos.forEach((dataUrl, pi) => {
+            photoBlocks.push(makePhotoParagraph(dataUrl, `${d.code} – ${c.label} (photo ${pi+1})`));
+          });
+        }
+      });
     });
 
     const children = [
-
       // ── TITLE BLOCK ──
       new Table({
         width: { size: 9360, type: WidthType.DXA },
         columnWidths: [9360],
         rows: [new TableRow({ children: [tc([
           p('MINISTÈRE DE L\'ÉDUCATION NATIONALE, DE L\'ALPHABÉTISATION ET DE L\'ENSEIGNEMENT TECHNIQUE', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }),
-          p('Direction de la Coordination et de l\'Exécution des Projets (DCEP)', { size: 16, italic: true, color: 'C8DDF5', align: AlignmentType.CENTER }),
+          p('Mission conjointe post-réception provisoire — Région de San Pédro · Mai 2026', { size: 16, italic: true, color: 'C8DDF5', align: AlignmentType.CENTER }),
           blank(),
-          p('RAPPORT JOURNALIER DE VISITE TECHNIQUE', { bold: true, size: 30, color: WHITE, align: AlignmentType.CENTER }),
-          p('FICHE DE VISITE TECHNIQUE PRÉALABLE À LA RÉCEPTION DÉFINITIVE DES CDP', { bold: true, size: 22, color: 'C8DDF5', align: AlignmentType.CENTER }),
-          p('DU PROJET COMPÉTENCES – MCA-CI', { bold: true, size: 22, color: GOLD, align: AlignmentType.CENTER }),
+          p('RAPPORT DE VISITE TECHNIQUE PRÉALABLE', { bold: true, size: 30, color: WHITE, align: AlignmentType.CENTER }),
+          p('À LA RÉCEPTION DÉFINITIVE DES COLLÈGES DE PROXIMITÉ (CDP)', { bold: true, size: 22, color: 'C8DDF5', align: AlignmentType.CENTER }),
+          p('Mission conjointe DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', { bold: true, size: 18, color: GOLD, align: AlignmentType.CENTER }),
           blank(),
           p(`Date : ${dateDisplay}   ·   N° Rapport : ${numRapport}   ·   DRENAET : ${drena}`, { size: 18, color: 'C8DDF5', align: AlignmentType.CENTER }),
-          p(`Enquêteur / Représentant DCEP : ${enqueteur}   ·   Statut : ${statutLbl}`, { size: 18, italic: true, color: 'C8DDF5', align: AlignmentType.CENTER }),
+          p(`Enquêteur / Coordonnateur : ${enqueteur}   ·   Statut : ${statutLbl}`, { size: 18, italic: true, color: 'C8DDF5', align: AlignmentType.CENTER }),
         ], { fill: BLUE_DARK, borders: noBdrs() })]})],
       }),
       blank(),
@@ -3420,67 +4603,106 @@ async function generateReport() {
       }),
       blank(),
 
-      // ── II. CONSTATS ──
+      // ── II. CONSTATS PAR DIRECTION ──
       new Table({
         width: { size: 9360, type: WidthType.DXA },
         columnWidths: [9360],
         rows: [new TableRow({ children: [tc([
-          p(`II. CONSTATS DES MALFAÇONS ET NON-CONFORMITÉS`, { bold: true, size: 22, color: WHITE }),
-          p(`${issues.length} malfaçon(s) constatée(s) · ${constOk.length} conforme(s)`, { size: 18, italic: true, color: 'C8DDF5' }),
+          p(`II. CONSTATS PAR DIRECTION`, { bold: true, size: 22, color: WHITE }),
+          p(`${totalIssues} malfaçon(s) constatée(s) au total · ${totalOk} conforme(s)`, { size: 18, italic: true, color: 'C8DDF5' }),
         ], { fill: BLUE_MED, bc: BLUE_MED })] })]
       }),
-
-      new Table({
-        width: { size: 9360, type: WidthType.DXA },
-        columnWidths: [360, 3200, 500, 500, 4800],
-        rows: [
-          new TableRow({
-            tableHeader: true,
-            children: [
-              tc(p('N°', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
-              tc(p('CONSTAT / MALFAÇON', { bold: true, size: 18, color: WHITE }), { fill: BLUE_DARK }),
-              tc(p('OUI', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
-              tc(p('NON', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
-              tc(p('DESCRIPTION TECHNIQUE', { bold: true, size: 18, color: WHITE }), { fill: BLUE_DARK }),
-            ]
-          }),
-          ...CONSTATS_LIST.map((c, i) => {
-            const saved = (etab.constats || {})[c.id] || {};
-            const isOui = saved.reponse === 'OUI';
-            const isNon = saved.reponse === 'NON';
-            const fill = isOui ? 'FFF0F0' : (isNon ? 'F0FFF4' : (i%2===0?'FFFFFF':GREY));
-            const nbPhotos = (saved.photos || []).length;
-            return new TableRow({ children: [
-              tc(p(String(i+1), { size: 18, align: AlignmentType.CENTER, bold: true, color: BLUE_MED }), { fill }),
-              tc([p(c.label, { size: 18 }), p(c.cat, { size: 16, italic: true, color: '888888' })], { fill }),
-              tc(p(isOui ? '✔' : '', { size: 20, align: AlignmentType.CENTER, bold: true, color: RED }), { fill }),
-              tc(p(isNon ? '✔' : '', { size: 20, align: AlignmentType.CENTER, bold: true, color: GREEN_C }), { fill }),
-              tc(p(isOui ? ((saved.description || '(pas de description)') + (nbPhotos ? ` [${nbPhotos} photo(s) jointe(s)]` : '')) : (isNon ? 'Conforme' : '(non renseigné)'), { size: 18, italic: !isOui && !isNon, color: isOui ? RED : (isNon ? GREEN_C : '999999') }), { fill }),
-            ]});
-          }),
-        ]
-      }),
       blank(),
+    ];
 
-      // Autres constats
-      ...((etab.autresConstats||[]).length > 0 ? [
+    // Pour chaque direction → tableau de constats
+    DIRECTIONS.forEach(d => {
+      const list = CONSTATS_BY_DIR[d.id] || [];
+      const constatsDir = etab.constats[d.id] || {};
+      const issuesDir = list.filter(c => !c.freeText && (constatsDir[c.id] || {}).reponse === 'OUI').length;
+      const okDir = list.filter(c => !c.freeText && (constatsDir[c.id] || {}).reponse === 'NON').length;
+      const dColor = dirColorHex(d.id);
+
+      children.push(
+        // Bandeau direction
         new Table({
           width: { size: 9360, type: WidthType.DXA },
           columnWidths: [9360],
-          rows: [new TableRow({ children: [tc(p('AUTRES CONSTATS OBSERVÉS', { bold: true, size: 20, color: WHITE }), { fill: BLUE_MED, bc: BLUE_MED })] })]
+          rows: [new TableRow({ children: [tc([
+            p(`${d.code} — ${d.label.split('—')[1] || ''}`, { bold: true, size: 20, color: WHITE }),
+            p(`${issuesDir} malfaçon(s) · ${okDir} conforme(s) sur ${list.length} constats`, { size: 14, italic: true, color: 'EEEEEE' }),
+          ], { fill: dColor, bc: dColor })] })]
         }),
+        // Tableau constats
         new Table({
           width: { size: 9360, type: WidthType.DXA },
-          columnWidths: [360, 9000],
-          rows: (etab.autresConstats||[]).map((desc, i) => new TableRow({ children: [
-            tc(p(`A${i+1}`, { size: 18, bold: true, color: BLUE_MED, align: AlignmentType.CENTER }), { fill: BLUE_LIGHT }),
-            tc(p(desc || '(pas de description)', { size: 18 })),
-          ]}))
+          columnWidths: [360, 3200, 500, 500, 4800],
+          rows: [
+            new TableRow({
+              tableHeader: true,
+              children: [
+                tc(p('N°', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+                tc(p('CONSTAT', { bold: true, size: 16, color: WHITE }), { fill: BLUE_DARK }),
+                tc(p('OUI', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+                tc(p('NON', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+                tc(p('DESCRIPTION TECHNIQUE', { bold: true, size: 16, color: WHITE }), { fill: BLUE_DARK }),
+              ]
+            }),
+            ...list.map((c, i) => {
+              const saved = constatsDir[c.id] || {};
+              // Mode FREE TEXT : afficher en pleine ligne, sans OUI/NON
+              if (c.freeText) {
+                const hasText = (saved.description || '').trim();
+                const fill = hasText ? 'FEF3C7' : (i%2===0?'FFFFFF':GREY);
+                return new TableRow({ children: [
+                  tc(p('📝', { size: 16, align: AlignmentType.CENTER }), { fill }),
+                  tc([p(c.label, { size: 16 }), p(c.cat + ' · Champ libre', { size: 14, italic: true, color: '888888' })], { fill }),
+                  tc(p('—', { size: 14, align: AlignmentType.CENTER, color: '999999' }), { fill }),
+                  tc(p('—', { size: 14, align: AlignmentType.CENTER, color: '999999' }), { fill }),
+                  tc(p(saved.description || '(non renseigné)', { size: 16, italic: !hasText, color: hasText ? '92400E' : '999999' }), { fill }),
+                ]});
+              }
+              const isOui = saved.reponse === 'OUI';
+              const isNon = saved.reponse === 'NON';
+              const fill = isOui ? 'FFF0F0' : (isNon ? 'F0FFF4' : (i%2===0?'FFFFFF':GREY));
+              const nbPhotos = (saved.photos || []).length;
+              return new TableRow({ children: [
+                tc(p(String(i+1), { size: 16, align: AlignmentType.CENTER, bold: true, color: dColor }), { fill }),
+                tc([p(c.label, { size: 16 }), p(c.cat, { size: 14, italic: true, color: '888888' })], { fill }),
+                tc(p(isOui ? '✔' : '', { size: 18, align: AlignmentType.CENTER, bold: true, color: RED }), { fill }),
+                tc(p(isNon ? '✔' : '', { size: 18, align: AlignmentType.CENTER, bold: true, color: GREEN_C }), { fill }),
+                tc(p(isOui ? ((saved.description || '(pas de description)') + (nbPhotos ? ` [${nbPhotos} photo(s) jointe(s)]` : '')) : (isNon ? 'Conforme' : '(non renseigné)'), { size: 16, italic: !isOui && !isNon, color: isOui ? RED : (isNon ? GREEN_C : '999999') }), { fill }),
+              ]});
+            }),
+          ]
         }),
         blank(),
-      ] : []),
+      );
 
-      // ── III. OBSERVATIONS ──
+      // Autres constats de cette direction
+      const autresDir = (etab.autresConstats[d.id] || []).filter(x => x.trim());
+      if (autresDir.length) {
+        children.push(
+          new Table({
+            width: { size: 9360, type: WidthType.DXA },
+            columnWidths: [9360],
+            rows: [new TableRow({ children: [tc(p(`AUTRES CONSTATS ${d.code}`, { bold: true, size: 16, color: WHITE }), { fill: dColor, bc: dColor })] })]
+          }),
+          new Table({
+            width: { size: 9360, type: WidthType.DXA },
+            columnWidths: [360, 9000],
+            rows: autresDir.map((desc, i) => new TableRow({ children: [
+              tc(p(`A${i+1}`, { size: 16, bold: true, color: dColor, align: AlignmentType.CENTER }), { fill: 'F0F0F0' }),
+              tc(p(desc, { size: 16 })),
+            ]}))
+          }),
+          blank(),
+        );
+      }
+    });
+
+    // ── III. OBSERVATIONS ──
+    children.push(
       new Table({
         width: { size: 9360, type: WidthType.DXA },
         columnWidths: [9360],
@@ -3509,38 +4731,80 @@ async function generateReport() {
         ]
       }),
       blank(),
+    );
 
-      // ── IV. RÉSERVES ──
-      ...((etab.reserves||[]).length > 0 ? [
+    // ── IV. RÉSERVES (auto + manuelles) ──
+    const reservesRows = [];
+    let rNum = 0;
+    DIRECTIONS.forEach(d => {
+      const list = CONSTATS_BY_DIR[d.id] || [];
+      list.forEach(c => {
+        if (c.freeText) return; // pas de réserve auto sur freeText
+        const x = (etab.constats[d.id] || {})[c.id] || {};
+        if (x.reponse === 'OUI') {
+          rNum++;
+          const key = `auto_${etabIdx}_${d.id}_${c.id}`;
+          const o = (f.reservesOverrides || {})[key] || {};
+          reservesRows.push({
+            n: 'R' + rNum,
+            dir: d.code, dirColor: dirColorHex(d.id),
+            constat: c.label,
+            desc: x.description || '(constat sans description)',
+            delai: o.delai || getDefaultReserveDelay(c.cat),
+            statut: o.statut || 'En cours',
+          });
+        }
+      });
+    });
+    (etab.reservesManual || []).forEach((r, i) => {
+      const dir = DIRECTIONS.find(x => x.id === r.dir);
+      reservesRows.push({
+        n: 'M' + (i+1),
+        dir: dir ? dir.code : '—', dirColor: dir ? dirColorHex(dir.id) : '888888',
+        constat: '(manuelle)',
+        desc: r.desc,
+        delai: r.delai || '—',
+        statut: r.statut || '—',
+      });
+    });
+
+    if (reservesRows.length) {
+      children.push(
         new Table({
           width: { size: 9360, type: WidthType.DXA },
           columnWidths: [9360],
-          rows: [new TableRow({ children: [tc(p('IV. SUIVI DES RÉSERVES CONTRACTUELLES', { bold: true, size: 22, color: WHITE }), { fill: BLUE_MED, bc: BLUE_MED })] })]
+          rows: [new TableRow({ children: [tc(p(`IV. RÉSERVES NOTIFIÉES (${reservesRows.length})`, { bold: true, size: 22, color: WHITE }), { fill: BLUE_MED, bc: BLUE_MED })] })]
         }),
         new Table({
           width: { size: 9360, type: WidthType.DXA },
-          columnWidths: [400, 5560, 1600, 1800],
+          columnWidths: [500, 800, 2800, 3200, 1060, 1000],
           rows: [
             new TableRow({ tableHeader: true, children: [
-              tc(p('N°', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
-              tc(p('Description', { bold: true, size: 18, color: WHITE }), { fill: BLUE_DARK }),
-              tc(p('Délai levée', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
-              tc(p('Statut', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+              tc(p('N°', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+              tc(p('Dir.', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+              tc(p('Constat origine', { bold: true, size: 16, color: WHITE }), { fill: BLUE_DARK }),
+              tc(p('Description', { bold: true, size: 16, color: WHITE }), { fill: BLUE_DARK }),
+              tc(p('Délai', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
+              tc(p('Statut', { bold: true, size: 16, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK }),
             ]}),
-            ...(etab.reserves||[]).map((r, i) => new TableRow({ children: [
-              tc(p(`R${i+1}`, { size: 18, bold: true, color: BLUE_MED, align: AlignmentType.CENTER }), { fill: i%2===0?'FFFFFF':GREY }),
-              tc(p(r.desc || '___', { size: 18 }), { fill: i%2===0?'FFFFFF':GREY }),
-              tc(p(r.delai || '___', { size: 18, align: AlignmentType.CENTER }), { fill: i%2===0?'FFFFFF':GREY }),
-              tc(p(r.statut || '___', { size: 18, align: AlignmentType.CENTER, bold: true,
+            ...reservesRows.map((r, i) => new TableRow({ children: [
+              tc(p(r.n, { size: 16, bold: true, color: r.dirColor, align: AlignmentType.CENTER }), { fill: i%2===0?'FFFFFF':GREY }),
+              tc(p(r.dir, { size: 14, bold: true, color: WHITE, align: AlignmentType.CENTER }), { fill: r.dirColor }),
+              tc(p(r.constat, { size: 14, italic: true }), { fill: i%2===0?'FFFFFF':GREY }),
+              tc(p(r.desc, { size: 16 }), { fill: i%2===0?'FFFFFF':GREY }),
+              tc(p(r.delai, { size: 16, align: AlignmentType.CENTER }), { fill: i%2===0?'FFFFFF':GREY }),
+              tc(p(r.statut, { size: 16, align: AlignmentType.CENTER, bold: true,
                 color: r.statut==='Levée'?GREEN_C:(r.statut==='En cours'?GOLD:RED) }), { fill: i%2===0?'FFFFFF':GREY }),
             ]}))
           ]
         }),
         blank(),
-      ] : []),
+      );
+    }
 
-      // ── PHOTOS ──
-      ...(photoBlocks.length > 0 ? [
+    // ── PHOTOS ──
+    if (photoBlocks.length > 0) {
+      children.push(
         new Table({
           width: { size: 9360, type: WidthType.DXA },
           columnWidths: [9360],
@@ -3549,45 +4813,97 @@ async function generateReport() {
         blank(),
         ...photoBlocks,
         blank(),
-      ] : []),
+      );
+    }
 
-      // ── V. SIGNATURES ──
+    // ── V. SIGNATURES PAR DIRECTION ──
+    children.push(
       new Table({
         width: { size: 9360, type: WidthType.DXA },
         columnWidths: [9360],
         rows: [new TableRow({ children: [tc(p('V. SIGNATURES DES PARTIES', { bold: true, size: 22, color: WHITE }), { fill: BLUE_MED, bc: BLUE_MED })] })]
       }),
-      p('Les soussignés certifient l\'exactitude des constats consignés dans le présent rapport.', { size: 18, italic: true }),
+      p('Les soussignés certifient l\'exactitude des constats consignés pour leur direction respective.', { size: 18, italic: true }),
       blank(),
-      new Table({
-        width: { size: 9360, type: WidthType.DXA },
-        columnWidths: [3120, 3120, 3120],
-        rows: [
-          new TableRow({ children: [
-            tc(p('Représentant DCEP / MENAET', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_MED, bc: BLUE_MED }),
-            tc(p('Chef d\'Établissement', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_MED, bc: BLUE_MED }),
-            tc(p('Représentant Entreprise', { bold: true, size: 18, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_MED, bc: BLUE_MED }),
-          ]}),
-          new TableRow({ children: [
-            tc([
-              p(f.sig1Name || '_______________', { size: 18 }),
-              p(f.sig1Titre || '', { size: 16, italic: true, color: '666666' }),
-              p(''), p(''), p(''), p('Signature :'),
-            ], { w: 3120 }),
-            tc([
-              p(f.sig2Name || chef, { size: 18 }),
-              p(f.sig2Etab || college, { size: 16, italic: true, color: '666666' }),
-              p(''), p(''), p(''), p('Signature :'),
-            ], { w: 3120 }),
-            tc([
-              p(f.sig3Name || '_______________', { size: 18 }),
-              p(f.sig3Entreprise || entreprise, { size: 16, italic: true, color: '666666' }),
-              p(''), p(''), p(''), p('Signature :'),
-            ], { w: 3120 }),
-          ]}),
-        ]
-      }),
-    ];
+    );
+
+    // Helper pour insérer une image signature dans une cellule
+    function sigImage(dataUrl, width=140, height=50) {
+      if (!dataUrl) return p('(non signée)', { size: 12, italic: true, color: '999999' });
+      try {
+        const base64 = dataUrl.split(',')[1];
+        const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        return new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 60, after: 60 },
+          children: [new ImageRun({ data: bytes, transformation: { width, height } })]
+        });
+      } catch(err) {
+        return p('(signature non lisible)', { size: 12, italic: true, color: '999999' });
+      }
+    }
+
+    // Signatures par direction : 2 rangées de 3 (6 directions) — propres à CET établissement
+    const sigCells = DIRECTIONS.map(d => {
+      const dColor = dirColorHex(d.id);
+      return tc([
+        p(d.code, { bold: true, size: 14, color: WHITE, align: AlignmentType.CENTER }),
+      ], { w: 3120, fill: dColor, bc: dColor });
+    });
+    const sigBodyCells = DIRECTIONS.map(d => {
+      const s = (etab.signaturesByDir && etab.signaturesByDir[d.id]) || { name:'', fonction:'', dataUrl:'' };
+      return tc([
+        p(s.name || '_______________', { size: 16, bold: true, align: AlignmentType.CENTER }),
+        p(s.fonction || '', { size: 14, italic: true, color: '666666', align: AlignmentType.CENTER }),
+        p(d.label.split('—')[1]?.trim() || '', { size: 12, italic: true, color: '888888', align: AlignmentType.CENTER }),
+        sigImage(s.dataUrl, 130, 45),
+      ], { w: 3120 });
+    });
+    // Rangée 1 : 3 premières directions
+    children.push(new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: [3120, 3120, 3120],
+      rows: [
+        new TableRow({ children: sigCells.slice(0, 3) }),
+        new TableRow({ children: sigBodyCells.slice(0, 3) }),
+      ]
+    }));
+    children.push(blank());
+    children.push(new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: [3120, 3120, 3120],
+      rows: [
+        new TableRow({ children: sigCells.slice(3, 6) }),
+        new TableRow({ children: sigBodyCells.slice(3, 6) }),
+      ]
+    }));
+    children.push(blank());
+
+    // Signatures Chef d'établissement et Entreprise
+    const sChef = etab.sigChef || { name:'', etab:'', dataUrl:'' };
+    const sEnt = etab.sigEnt || { name:'', entreprise:'', dataUrl:'' };
+    children.push(new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: [4680, 4680],
+      rows: [
+        new TableRow({ children: [
+          tc(p('🏫 CHEF D\'ÉTABLISSEMENT', { bold: true, size: 14, color: '8B6914', align: AlignmentType.CENTER }), { fill: 'F5E4C3', bc: GOLD }),
+          tc(p('🏗️ REPRÉSENTANT ENTREPRISE', { bold: true, size: 14, color: WHITE, align: AlignmentType.CENTER }), { fill: BLUE_DARK, bc: BLUE_DARK }),
+        ]}),
+        new TableRow({ children: [
+          tc([
+            p(sChef.name || chef, { size: 16, bold: true, align: AlignmentType.CENTER }),
+            p(sChef.etab || college, { size: 14, italic: true, color: '666666', align: AlignmentType.CENTER }),
+            sigImage(sChef.dataUrl, 180, 55),
+          ], { w: 4680 }),
+          tc([
+            p(sEnt.name || '_______________', { size: 16, bold: true, align: AlignmentType.CENTER }),
+            p(sEnt.entreprise || entreprise, { size: 14, italic: true, color: '666666', align: AlignmentType.CENTER }),
+            sigImage(sEnt.dataUrl, 180, 55),
+          ], { w: 4680 }),
+        ]}),
+      ]
+    }));
 
     sections.push({
       properties: {
@@ -3604,10 +4920,10 @@ async function generateReport() {
             rows: [new TableRow({ children: [
               tc([
                 p('MINISTÈRE DE L\'ÉDUCATION NATIONALE, DE L\'ALPHABÉTISATION ET DE L\'ENSEIGNEMENT TECHNIQUE', { bold: true, size: 16, color: BLUE_DARK }),
-                p('Direction de la Coordination et de l\'Exécution des Projets (DCEP)', { size: 14, italic: true, color: '666666' }),
+                p('Mission conjointe post-réception provisoire CDP — San Pédro 2026', { size: 14, italic: true, color: '666666' }),
               ], { borders: noBdrs() }),
               tc([
-                p('PROJET COMPÉTENCES – MCA-CI', { bold: true, size: 16, color: GOLD, align: AlignmentType.RIGHT }),
+                p('DCEP · DESPS · DAF · DAPS-COGES · SGP · DRH', { bold: true, size: 14, color: GOLD, align: AlignmentType.RIGHT }),
                 p(`Rapport N° ${numRapport}  ·  ${dateDisplay}`, { size: 14, italic: true, color: '888888', align: AlignmentType.RIGHT }),
               ], { borders: noBdrs() }),
             ]})]
@@ -3619,7 +4935,7 @@ async function generateReport() {
         default: new Footer({ children: [
           new Paragraph({
             border: { top: { style: BorderStyle.SINGLE, size: 4, color: BLUE_MED, space: 1 } },
-            children: [new TextRun({ text: `DCEP/MENAET – Mission terrain CDP · ${college} · Document contradictoire confidentiel`, font: 'Arial', size: 16, color: '888888', italics: true })]
+            children: [new TextRun({ text: `MENAET – Mission terrain CDP · ${college} · Document confidentiel`, font: 'Arial', size: 16, color: '888888', italics: true })]
           })
         ]})
       },
