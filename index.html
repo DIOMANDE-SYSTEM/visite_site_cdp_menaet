@@ -1746,10 +1746,11 @@
           <option value="validee">✅ Validée</option>
         </select>
       </div>
-      <div style="max-height:55vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
+      <div style="max-height:48vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
         <table class="data-table">
           <thead>
             <tr>
+              <th style="width:36px;"><input type="checkbox" id="ficheSelectAll" onchange="toggleSelectAllFiches(this.checked)" title="Tout sélectionner"></th>
               <th>N° Rapport</th>
               <th>Date</th>
               <th>DRENAET</th>
@@ -1761,6 +1762,43 @@
           </thead>
           <tbody id="fichesListBody"></tbody>
         </table>
+      </div>
+
+      <!-- ── PANNEAU IA : RAPPORTS CONSOLIDÉS ── -->
+      <div class="card" style="margin-top:18px;border:2px solid var(--gold);">
+        <div class="card-header" style="background:linear-gradient(135deg,var(--gold) 0%,#A87526 100%);">
+          <div class="card-icon" style="background:rgba(255,255,255,0.2);">🤖</div>
+          <div>
+            <div class="card-title" style="color:white;">Générateur de rapports consolidés (IA)</div>
+            <div class="card-subtitle" style="color:#FEF3C7;">Compile plusieurs fiches en un rapport général ou journalier (Word / PDF)</div>
+          </div>
+        </div>
+        <div class="card-body" style="padding:16px;">
+          <!-- Rapport Général -->
+          <div style="margin-bottom:18px;padding:12px;background:#FEF3C7;border-radius:8px;border-left:4px solid var(--gold);">
+            <div style="font-weight:700;font-size:14px;color:#8B6914;margin-bottom:6px;">📊 RAPPORT GÉNÉRAL CONSOLIDÉ</div>
+            <div style="font-size:12.5px;color:#666;margin-bottom:10px;">Sélectionne les fiches à consolider via les cases à cocher du tableau ci-dessus (<span id="selectedCount" style="font-weight:700;color:#8B6914;">0</span> sélectionnée(s)). Le rapport reprend le plan en 8 sections : Contexte · Méthodologie · Synthèse · Analyse thématique · COGES · DESPS · Recommandations · Conclusion.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-gold" onclick="generateConsolidatedReport('general','docx')">✨ Rapport Général · Word</button>
+              <button class="btn btn-primary" onclick="generateConsolidatedReport('general','pdf')">✨ Rapport Général · PDF</button>
+            </div>
+          </div>
+
+          <!-- Rapport Journalier -->
+          <div style="padding:12px;background:#E0EBFA;border-radius:8px;border-left:4px solid var(--blue);">
+            <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:6px;">📅 RAPPORT JOURNALIER</div>
+            <div style="font-size:12.5px;color:#666;margin-bottom:10px;">Toutes les fiches dont la date de visite correspond au jour sélectionné (même plan en 8 sections, filtré sur la journée).</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+              <label style="font-size:12.5px;font-weight:600;color:var(--navy);">Date de la journée :</label>
+              <input type="date" id="dailyReportDate" onchange="updateDailyReportCount()" style="padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+              <span id="dailyReportCount" style="font-size:12px;color:var(--grey);font-style:italic;"></span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="generateConsolidatedReport('daily','docx')">📅 Rapport Journalier · Word</button>
+              <button class="btn" onclick="generateConsolidatedReport('daily','pdf')">📅 Rapport Journalier · PDF</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2616,8 +2654,20 @@ function getVisibleDirections() {
   if (state.user.role === 'admin' || state.user.direction === 'all') return DIRECTIONS;
   if (state.publicMode) return DIRECTIONS; // mode lecture publique : tout visible
   if (state.user.direction) {
-    const dir = DIRECTIONS.find(d => d.id === state.user.direction);
-    return dir ? [dir] : DIRECTIONS;
+    // ─── Règle métier : tous les utilisateurs ont accès au questionnaire DCEP
+    // en plus de leur direction de rattachement (DCEP = socle technique commun) ───
+    if (state.user.direction === 'dcep') {
+      // L'utilisateur DCEP ne voit que DCEP (sa propre direction)
+      const dir = DIRECTIONS.find(d => d.id === 'dcep');
+      return dir ? [dir] : DIRECTIONS;
+    }
+    // Autres directions : DCEP + leur propre direction (dans l'ordre des DIRECTIONS)
+    const userDir = DIRECTIONS.find(d => d.id === state.user.direction);
+    const dcep = DIRECTIONS.find(d => d.id === 'dcep');
+    const visible = [];
+    if (dcep) visible.push(dcep);
+    if (userDir && userDir.id !== 'dcep') visible.push(userDir);
+    return visible.length ? visible : DIRECTIONS;
   }
   return DIRECTIONS;
 }
@@ -2642,9 +2692,13 @@ function renderDirSubTabs() {
         if (x && x.reponse === 'OUI') oui++;
       });
     }
-    return `<button class="etab-tab ${active ? 'active' : ''}" onclick="switchDir('${d.id}')" style="${active ? `border-color:${d.color};background:${d.color}1A;color:${d.color};` : ''}">
+    // Badge "socle commun" si DCEP n'est pas la direction de l'utilisateur connecté
+    const isSocleCommun = d.id === 'dcep' && state.user && state.user.direction && state.user.direction !== 'dcep' && state.user.direction !== 'all' && state.user.role !== 'admin' && !state.publicMode;
+    const socleBadge = isSocleCommun ? `<span style="background:#FEF3C7;color:#92400E;font-size:9.5px;font-weight:600;padding:1px 5px;border-radius:3px;margin-left:3px;letter-spacing:0.3px;">SOCLE</span>` : '';
+    return `<button class="etab-tab ${active ? 'active' : ''}" onclick="switchDir('${d.id}')" style="${active ? `border-color:${d.color};background:${d.color}1A;color:${d.color};` : ''}" title="${isSocleCommun ? 'Questionnaire DCEP partagé (socle technique commun à toutes les directions)' : escapeHtml(d.label)}">
       <span style="font-size:14px;">${d.icon}</span>
       <span>${d.code}</span>
+      ${socleBadge}
       <span style="background:${oui > 0 ? 'var(--red)' : 'var(--grey-light)'};color:${oui > 0 ? 'white' : 'var(--grey)'};font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:4px;">${list.length}</span>
     </button>`;
   }).join('');
@@ -3974,7 +4028,28 @@ function duplicateFiche(id) {
 
 function openFichesModal() {
   renderFichesList();
+  // Pré-remplir la date du rapport journalier avec aujourd'hui si vide
+  const dateInput = $('dailyReportDate');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+    if (dateInput.onchange) dateInput.onchange();
+  }
+  updateDailyReportCount();
   openModal('modalFiches');
+}
+
+// Met à jour le compteur de fiches éligibles à la date sélectionnée
+function updateDailyReportCount() {
+  const dateInput = $('dailyReportDate');
+  const span = $('dailyReportCount');
+  if (!dateInput || !span) return;
+  const d = dateInput.value;
+  if (!d) { span.textContent = ''; return; }
+  const n = state.fiches.filter(f => f.dateVisite === d).length;
+  span.textContent = n === 0 ? 'Aucune fiche pour cette date' : (n + ' fiche' + (n>1?'s':'') + ' trouvée' + (n>1?'s':''));
+  span.style.color = n === 0 ? 'var(--red)' : 'var(--green)';
+  span.style.fontStyle = 'normal';
+  span.style.fontWeight = '600';
 }
 
 function renderFichesList() {
@@ -3992,14 +4067,32 @@ function renderFichesList() {
   }
   if (filterStatut) list = list.filter(f => f.statut === filterStatut);
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div>Aucune fiche</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div>Aucune fiche</div></td></tr>`;
+    updateSelectedFichesCount();
     return;
   }
   tbody.innerHTML = list.map(f => {
     const colleges = (f.etabs || []).map(e => e.college || 'Étab').join(', ').substring(0, 60);
-    const issues = (f.etabs || []).reduce((acc, e) => acc + Object.values(e.constats || {}).filter(c => c.reponse === 'OUI').length, 0);
+    // Compter correctement les OUI (nouveau format par direction)
+    let issues = 0;
+    (f.etabs || []).forEach(e => {
+      const c = e.constats || {};
+      // Nouveau format : c[dirId][constatId] = {reponse, ...}
+      Object.values(c).forEach(dirObj => {
+        if (dirObj && typeof dirObj === 'object') {
+          // Soit un sous-objet par direction, soit l'ancien format plat
+          if (dirObj.reponse !== undefined) {
+            if (dirObj.reponse === 'OUI') issues++;
+          } else {
+            Object.values(dirObj).forEach(cst => { if (cst && cst.reponse === 'OUI') issues++; });
+          }
+        }
+      });
+    });
     const canEdit = canEditFiche(f);
+    const checked = state.selectedFiches?.has(f.id) ? 'checked' : '';
     return `<tr>
+      <td style="text-align:center;"><input type="checkbox" class="ficheSelectCb" data-fid="${f.id}" ${checked} onchange="toggleFicheSelection('${f.id}', this.checked)"></td>
       <td><strong>${escapeHtml(f.numRapport || '—')}</strong></td>
       <td>${fmtDate(f.dateVisite)}</td>
       <td>${escapeHtml(f.drena || '—')}</td>
@@ -4013,6 +4106,56 @@ function renderFichesList() {
       </td>
     </tr>`;
   }).join('');
+  updateSelectedFichesCount();
+  updateDailyReportCount();
+}
+
+// ── Sélection multiple ──
+function toggleFicheSelection(id, checked) {
+  if (!state.selectedFiches) state.selectedFiches = new Set();
+  if (checked) state.selectedFiches.add(id);
+  else state.selectedFiches.delete(id);
+  updateSelectedFichesCount();
+  // Mettre à jour l'état du "tout sélectionner"
+  const all = document.querySelectorAll('.ficheSelectCb');
+  const allChecked = Array.from(all).every(cb => cb.checked);
+  const noneChecked = Array.from(all).every(cb => !cb.checked);
+  const masterCb = $('ficheSelectAll');
+  if (masterCb) {
+    masterCb.checked = allChecked && all.length > 0;
+    masterCb.indeterminate = !allChecked && !noneChecked;
+  }
+}
+
+function toggleSelectAllFiches(checked) {
+  if (!state.selectedFiches) state.selectedFiches = new Set();
+  document.querySelectorAll('.ficheSelectCb').forEach(cb => {
+    cb.checked = checked;
+    const fid = cb.getAttribute('data-fid');
+    if (checked) state.selectedFiches.add(fid);
+    else state.selectedFiches.delete(fid);
+  });
+  updateSelectedFichesCount();
+}
+
+function updateSelectedFichesCount() {
+  const n = state.selectedFiches?.size || 0;
+  const el = $('selectedCount');
+  if (el) el.textContent = n;
+}
+
+function updateDailyReportCount() {
+  const dateInput = $('dailyReportDate');
+  const countEl = $('dailyReportCount');
+  if (!dateInput || !countEl) return;
+  if (!dateInput.value) {
+    // Pré-remplir avec aujourd'hui
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+  const date = dateInput.value;
+  const matches = state.fiches.filter(f => f.dateVisite === date);
+  countEl.textContent = `${matches.length} fiche(s) sur cette date`;
+  countEl.style.color = matches.length > 0 ? 'var(--green)' : 'var(--red)';
 }
 
 function loadFicheFromList(id) {
@@ -4473,7 +4616,16 @@ function generateAiReport() {
 
 // Compose un rapport narratif à partir des constats (templating local)
 function composeReportText(f) {
-  const dateStr = f.dateVisite ? new Date(f.dateVisite + 'T00:00:00').toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}) : '—';
+  // Format de date robuste : accepte ISO (yyyy-mm-dd) ou plage textuelle déjà formatée
+  let dateStr;
+  if (!f.dateVisite) {
+    dateStr = '—';
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(f.dateVisite)) {
+    dateStr = new Date(f.dateVisite + 'T00:00:00').toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+  } else {
+    // Plage de dates ou autre forme : afficher tel quel (déjà préformaté par buildConsolidatedFiche)
+    dateStr = f.dateVisite;
+  }
   const drena = f.drena || 'San Pédro';
   const enq = f.nomEnqueteur || 'l\'équipe désignée';
   const numR = f.numRapport || 'En cours d\'attribution';
@@ -4869,6 +5021,187 @@ Le tableau ci-après présente le bilan quantitatif des non-conformités relevé
   return parts.join('\n\n');
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// RAPPORTS CONSOLIDÉS (Général / Journalier)
+// ═══════════════════════════════════════════════════════════════════
+
+// Construit une "méta-fiche" virtuelle qui agrège plusieurs fiches en une seule structure
+// que composeReportText() sait déjà traiter (plan 8 sections + annexe SGP)
+function buildConsolidatedFiche(fiches, options = {}) {
+  if (!fiches || !fiches.length) return null;
+  // Tri chronologique des fiches par date de visite
+  const sorted = fiches.slice().sort((a, b) => (a.dateVisite || '').localeCompare(b.dateVisite || ''));
+  // Période couverte
+  const dates = [...new Set(sorted.map(f => f.dateVisite).filter(Boolean))].sort();
+  const drenas = [...new Set(sorted.map(f => f.drena).filter(Boolean))];
+  const enqueteurs = [...new Set(sorted.map(f => f.nomEnqueteur).filter(Boolean))];
+  const numRapports = sorted.map(f => f.numRapport).filter(Boolean);
+
+  let dateLabel;
+  if (options.type === 'daily') {
+    dateLabel = dates[0] || options.dateFilter || '';
+  } else if (dates.length === 1) {
+    dateLabel = dates[0];
+  } else if (dates.length > 1) {
+    dateLabel = dates[0] + ' au ' + dates[dates.length - 1];
+  } else dateLabel = '';
+
+  // Concaténer tous les etabs de toutes les fiches
+  const allEtabs = [];
+  sorted.forEach(f => {
+    (f.etabs || []).forEach(e => {
+      // S'assurer que la structure est complète (ensureConstatStructure se fera ailleurs)
+      // On annote avec la fiche d'origine pour la traçabilité par journée
+      allEtabs.push({
+        ...e,
+        __sourceFicheId: f.id,
+        __sourceFicheDate: f.dateVisite,
+        __sourceFicheNum: f.numRapport,
+        __sourceFicheDrena: f.drena,
+        __sourceFicheEnq: f.nomEnqueteur,
+      });
+    });
+  });
+
+  // Méta-fiche unique
+  return {
+    id: 'consolidated_' + Date.now(),
+    statut: options.type === 'daily' ? 'JOURNALIER' : 'GÉNÉRAL CONSOLIDÉ',
+    dateVisite: dateLabel,
+    numRapport: numRapports.length ? numRapports.join(' · ') : (options.type === 'daily' ? 'Rapport journalier' : 'Rapport général consolidé'),
+    drena: drenas.length ? drenas.join(' / ') : '',
+    nomEnqueteur: enqueteurs.length ? enqueteurs.join(' · ') : '',
+    etabs: allEtabs,
+    reservesOverrides: Object.assign({}, ...sorted.map(f => f.reservesOverrides || {})),
+    aiReport: '',
+    __consolidated: true,
+    __sourceFiches: sorted,
+    __reportType: options.type,
+    __nbFiches: sorted.length,
+    __period: dateLabel,
+  };
+}
+
+// Compose le texte d'un rapport consolidé (général ou journalier)
+function composeConsolidatedReportText(metaFiche) {
+  if (!metaFiche || !metaFiche.etabs.length) return '';
+  const text = composeReportText(metaFiche);
+  const isDaily = metaFiche.__reportType === 'daily';
+  const nbF = metaFiche.__nbFiches;
+  const nbE = metaFiche.etabs.length;
+  const prefixLabel = isDaily
+    ? `RAPPORT JOURNALIER DE MISSION\n${nbF} fiche${nbF>1?'s':''} consolidée${nbF>1?'s':''} · ${nbE} établissement${nbE>1?'s':''} · Journée du ${metaFiche.__period || metaFiche.dateVisite}`
+    : `RAPPORT GÉNÉRAL CONSOLIDÉ DE MISSION\n${nbF} fiche${nbF>1?'s':''} consolidée${nbF>1?'s':''} · ${nbE} établissement${nbE>1?'s':''} · Période ${metaFiche.__period || metaFiche.dateVisite}`;
+  let result = text.replace('MINISTÈRE DE L\'ÉDUCATION NATIONALE', prefixLabel + '\n\nMINISTÈRE DE L\'ÉDUCATION NATIONALE');
+
+  // Pour un rapport général multi-jours : insérer le tableau récap par journée
+  // dans la section I. CONTEXTE ET CADRE
+  if (!isDaily && metaFiche.__sourceFiches && metaFiche.__sourceFiches.length >= 2) {
+    const journees = buildJournalSummary(metaFiche.__sourceFiches);
+    if (journees.length >= 2) {
+      let recap = `\n\nTableau de synthèse de la mission (récapitulatif par journée de terrain) :\n\n`;
+      let totalE = 0, totalNC = 0;
+      journees.forEach((j, i) => {
+        const dStr = /^\d{4}-\d{2}-\d{2}$/.test(j.date)
+          ? new Date(j.date + 'T00:00:00').toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})
+          : j.date;
+        recap += `- Jour ${String(i+1).padStart(2,'0')} (${dStr}) — DRENAET ${[...j.drenas].join('/') || '—'} : ${j.nbEtabs} établissement${j.nbEtabs>1?'s':''} visité${j.nbEtabs>1?'s':''}, ${j.nbNC} non-conformité${j.nbNC>1?'s':''} relevée${j.nbNC>1?'s':''}.\n`;
+        totalE += j.nbEtabs; totalNC += j.nbNC;
+      });
+      recap += `\nTotal mission consolidée : ${totalE} établissement${totalE>1?'s visités':' visité'} sur ${journees.length} journée${journees.length>1?'s':''} de terrain, ${totalNC} non-conformité${totalNC>1?'s':''} cumulée${totalNC>1?'s':''}.`;
+      // Insérer juste avant la section II (avant le marqueur "II. MÉTHODOLOGIE")
+      result = result.replace('II. MÉTHODOLOGIE', recap + '\n\nII. MÉTHODOLOGIE');
+    }
+  }
+
+  return result;
+}
+
+// Construit le tableau récapitulatif par journée (pour rapport général multi-jours)
+function buildJournalSummary(sourceFiches) {
+  // Grouper par date de visite
+  const byDate = {};
+  sourceFiches.forEach(f => {
+    const d = f.dateVisite || '(date inconnue)';
+    if (!byDate[d]) byDate[d] = { date: d, fiches: [], drenas: new Set(), nbEtabs: 0, nbNC: 0 };
+    byDate[d].fiches.push(f);
+    if (f.drena) byDate[d].drenas.add(f.drena);
+    (f.etabs || []).forEach(e => {
+      byDate[d].nbEtabs++;
+      DIRECTIONS.forEach(dir => {
+        (CONSTATS_BY_DIR[dir.id] || []).forEach(c => {
+          if (c.freeText) return;
+          const x = ((e.constats || {})[dir.id] || {})[c.id];
+          if (x && x.reponse === 'OUI') byDate[d].nbNC++;
+        });
+      });
+    });
+  });
+  return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// Orchestrateur : génère + télécharge le rapport consolidé
+async function generateConsolidatedReport(type, format) {
+  let fiches;
+  let options = { type };
+
+  if (type === 'general') {
+    if (!state.selectedFiches || state.selectedFiches.size === 0) {
+      return toast('Cochez au moins une fiche dans le tableau pour le rapport général', 'error');
+    }
+    const ids = Array.from(state.selectedFiches);
+    fiches = state.fiches.filter(f => ids.includes(f.id));
+  } else if (type === 'daily') {
+    const d = $('dailyReportDate')?.value;
+    if (!d) return toast('Sélectionnez une date pour le rapport journalier', 'error');
+    fiches = state.fiches.filter(f => f.dateVisite === d);
+    options.dateFilter = d;
+    if (!fiches.length) return toast('Aucune fiche trouvée pour la date du ' + new Date(d).toLocaleDateString('fr-FR'), 'error');
+  } else {
+    return toast('Type de rapport inconnu : ' + type, 'error');
+  }
+
+  toast(`Composition du rapport ${type === 'daily' ? 'journalier' : 'général'} (${fiches.length} fiche${fiches.length>1?'s':''})…`, 'success');
+
+  try {
+    const meta = buildConsolidatedFiche(fiches, options);
+    if (!meta || !meta.etabs.length) return toast('Aucun établissement à consolider', 'error');
+    const text = composeConsolidatedReportText(meta);
+    meta.aiReport = text;
+    // Stocker temporairement dans state pour permettre download
+    state._consolidatedFiche = meta;
+    if (format === 'pdf') {
+      await downloadConsolidatedPdf(meta);
+    } else {
+      await downloadConsolidatedDocx(meta);
+    }
+  } catch(e) {
+    console.error(e);
+    toast('Erreur génération : ' + e.message, 'error');
+  }
+}
+
+// Wrappers qui appellent les fonctions existantes downloadAiReport* avec la méta-fiche
+async function downloadConsolidatedDocx(metaFiche) {
+  // On bascule temporairement state.currentFiche sur la méta-fiche pour réutiliser le code
+  const prev = state.currentFiche;
+  state.currentFiche = metaFiche;
+  try {
+    await downloadAiReportDocx();
+  } finally {
+    state.currentFiche = prev;
+  }
+}
+async function downloadConsolidatedPdf(metaFiche) {
+  const prev = state.currentFiche;
+  state.currentFiche = metaFiche;
+  try {
+    await downloadAiReportPdf();
+  } finally {
+    state.currentFiche = prev;
+  }
+}
+
 async function downloadAiReportDocx() {
   if (!state.currentFiche || !state.currentFiche.aiReport) return;
   try { await window.ensureLib('docx'); } catch(e) { return; }
@@ -5078,7 +5411,12 @@ async function downloadAiReportDocx() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Rapport_Auto_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.docx`;
+  // Nom du fichier adapté au type
+  let prefix = 'Rapport_Auto';
+  if (f.__reportType === 'general') prefix = 'Rapport_General_Consolide';
+  else if (f.__reportType === 'daily') prefix = 'Rapport_Journalier';
+  const safe = (s) => String(s || '').replace(/[^\w]/g, '_').substring(0, 40);
+  a.download = `${prefix}_${safe(f.numRapport || 'Fiche')}_${(f.dateVisite || '').replace(/[^0-9]/g,'').substring(0,8)}.docx`;
   a.click();
   URL.revokeObjectURL(url);
   toast('Word téléchargé', 'success');
@@ -5314,7 +5652,11 @@ async function downloadAiReportPdf() {
     if (i > 1) doc.text(`MENAET · Mission CDP ${f.drena || 'San Pédro'} · Page ${i} / ${total}`, pageWidth/2, pageHeight - 8, { align: 'center' });
   }
 
-  const fname = `Rapport_Auto_${(f.numRapport || 'Fiche').replace(/[^\w]/g,'_')}_${(f.dateVisite || '').replace(/-/g,'')}.pdf`;
+  let prefix = 'Rapport_Auto';
+  if (f.__reportType === 'general') prefix = 'Rapport_General_Consolide';
+  else if (f.__reportType === 'daily') prefix = 'Rapport_Journalier';
+  const safe = (s) => String(s || '').replace(/[^\w]/g, '_').substring(0, 40);
+  const fname = `${prefix}_${safe(f.numRapport || 'Fiche')}_${(f.dateVisite || '').replace(/[^0-9]/g,'').substring(0,8)}.pdf`;
   doc.save(fname);
   toast('PDF téléchargé', 'success');
 }
