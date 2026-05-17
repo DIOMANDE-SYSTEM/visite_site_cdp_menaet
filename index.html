@@ -1116,7 +1116,7 @@
   body.read-only #saveBtn,
   body.read-only .header-btn[onclick*="newFiche"],
   body.read-only .btn-tab-nav.finish,
-  body.read-only .btn-red,
+  body.read-only .btn-red:not(.btn-logout),
   body.read-only .btn-add-etab,
   body.read-only button[onclick*="newFiche"],
   body.read-only button[onclick*="deleteFiche"],
@@ -1126,6 +1126,23 @@
   body.read-only button[onclick*="addAutreConstat"],
   body.read-only button[onclick*="addEtab"] {
     display: none !important;
+  }
+  /* Bouton de déconnexion : toujours visible et cliquable même en lecture seule */
+  .btn-logout {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+  /* Visibilité administrateur (masqué par défaut, JS ajoute body.is-admin pour révéler) */
+  .admin-only {
+    display: none !important;
+  }
+  body.is-admin .admin-only {
+    display: inherit !important;
+  }
+  /* Les boutons admin-only doivent avoir le bon display value */
+  body.is-admin button.admin-only {
+    display: inline-flex !important;
   }
   .read-only-banner {
     background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
@@ -1177,7 +1194,7 @@
       <button class="header-btn read-only-hide" onclick="saveFicheNow()" title="Enregistrer">
         💾 Sauver
       </button>
-      <button class="header-btn" onclick="openParamsModal()" title="Paramètres">
+      <button class="header-btn admin-only" id="headerParamsBtn" onclick="openParamsModal()" title="Paramètres">
         ⚙️
       </button>
       <div class="progress-wrap">
@@ -2025,8 +2042,8 @@
         <div style="font-size:12px;color:var(--grey);" id="userMenuEmail">—</div>
         <div style="margin-top:6px;" id="userMenuRole"></div>
       </div>
-      <button class="btn" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="closeModal('modalUserMenu'); openParamsModal();">⚙️ Paramètres</button>
-      <button class="btn btn-red" style="width:100%;justify-content:center;" onclick="doLogout()">🚪 Déconnexion</button>
+      <button class="btn admin-only" id="userMenuParams" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="closeModal('modalUserMenu'); openParamsModal();">⚙️ Paramètres</button>
+      <button class="btn btn-logout" style="width:100%;justify-content:center;background:#DC2626;border-color:#DC2626;color:white;" onclick="doLogout()">🚪 Déconnexion</button>
     </div>
   </div>
 </div>
@@ -3468,7 +3485,9 @@ function doLogout() {
   localStorage.removeItem(LS.user);
   localStorage.removeItem(LS.currentFiche);
   closeModal('modalUserMenu');
+  applyReadOnlyMode(); // retire les classes body.read-only / body.is-admin
   openLogin();
+  toast('Déconnexion réussie', 'success');
 }
 
 function openLogin() { $('loginScreen').classList.add('open'); }
@@ -3546,6 +3565,8 @@ function isReadOnly() {
 function applyReadOnlyMode() {
   const readOnly = isReadOnly();
   document.body.classList.toggle('read-only', readOnly);
+  // Aussi gérer la classe is-admin pour révéler les éléments admin-only
+  document.body.classList.toggle('is-admin', isAdmin());
   // Désactiver tous les inputs/textarea/select pour empêcher saisie clavier
   document.querySelectorAll('input, textarea, select').forEach(el => {
     if (el.type === 'button' || el.type === 'submit') return;
@@ -4305,6 +4326,11 @@ function loadFicheFromList(id) {
 // PARAMS MODAL
 // ═══════════════════════════════════════════════════════════════════
 function openParamsModal() {
+  // ⚠️ Paramètres réservés à l'administrateur (et DESPS, admin de fait)
+  if (!isAdmin()) {
+    toast('Accès refusé — Paramètres réservés à l\'administrateur', 'error');
+    return;
+  }
   const admin = isAdmin();
   // Onglet Firebase : visible uniquement à l'admin
   const btnFb = $('paramTabFirebase');
