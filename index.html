@@ -1083,9 +1083,73 @@
     padding: 12px 22px;
     font-size: 15px;
   }
+
+  /* ═══ MODE LECTURE SEULE (INVITÉ) ═══ */
+  body.read-only input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  body.read-only textarea,
+  body.read-only select {
+    background-color: #F5F5F5 !important;
+    color: #6B7280 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+  }
+  body.read-only input[type="radio"],
+  body.read-only input[type="checkbox"] {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  body.read-only .toggle-group label {
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+  body.read-only .sig-canvas {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  body.read-only .read-only-hide {
+    display: none !important;
+  }
+  body.read-only .btn-add,
+  body.read-only .btn-remove,
+  body.read-only .photo-uploader-btn,
+  body.read-only .sig-canvas-actions button,
+  body.read-only #saveBtn,
+  body.read-only .header-btn[onclick*="newFiche"],
+  body.read-only .btn-tab-nav.finish,
+  body.read-only .btn-red,
+  body.read-only .btn-add-etab,
+  body.read-only button[onclick*="newFiche"],
+  body.read-only button[onclick*="deleteFiche"],
+  body.read-only button[onclick*="removeManualReserve"],
+  body.read-only button[onclick*="removeSgpDoc"],
+  body.read-only button[onclick*="addManualReserve"],
+  body.read-only button[onclick*="addAutreConstat"],
+  body.read-only button[onclick*="addEtab"] {
+    display: none !important;
+  }
+  .read-only-banner {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+    color: #78350F;
+    padding: 10px 18px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13.5px;
+    border-bottom: 2px solid #D97706;
+    position: sticky;
+    top: 0;
+    z-index: 95;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: none;
+  }
+  body.read-only .read-only-banner { display: block; }
 </style>
 </head>
 <body>
+
+<!-- Bannière mode lecture seule (invité) -->
+<div class="read-only-banner" id="readOnlyBanner">
+  👁️ Mode consultation — Vous êtes connecté en tant qu'invité. Vous pouvez consulter les fiches mais aucune modification n'est possible. Pour modifier, créez un compte ou connectez-vous.
+</div>
 
 <!-- ════════════════════════════════════════════════════════════════
      HEADER
@@ -1107,10 +1171,10 @@
       <button class="header-btn" onclick="openFichesModal()" title="Mes fiches enregistrées">
         📂 <span id="hdrFichesCount">0</span> fiches
       </button>
-      <button class="header-btn" onclick="newFiche()" title="Nouvelle fiche">
+      <button class="header-btn read-only-hide" onclick="newFiche()" title="Nouvelle fiche">
         ＋ Nouvelle
       </button>
-      <button class="header-btn" onclick="saveFicheNow()" title="Enregistrer">
+      <button class="header-btn read-only-hide" onclick="saveFicheNow()" title="Enregistrer">
         💾 Sauver
       </button>
       <button class="header-btn" onclick="openParamsModal()" title="Paramètres">
@@ -1803,7 +1867,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('modalFiches')">Fermer</button>
-      <button class="btn btn-gold" onclick="newFiche(); closeModal('modalFiches');">＋ Nouvelle fiche</button>
+      <button class="btn btn-gold read-only-hide" onclick="newFiche(); closeModal('modalFiches');">＋ Nouvelle fiche</button>
     </div>
   </div>
 </div>
@@ -2368,6 +2432,7 @@ function goToPrevTab() {
 // MULTI-ÉTABLISSEMENTS
 // ═══════════════════════════════════════════════════════════════════
 function addEtab() {
+  if (isReadOnly()) return toast('Mode lecture seule', 'error');
   saveCurrentEtab();
   state.currentFiche.etabs.push(createEtab());
   state.currentEtab = state.currentFiche.etabs.length - 1;
@@ -2408,7 +2473,7 @@ function renderEtabTabs() {
     }
     html += `</div>`;
   });
-  if (!state.publicMode) {
+  if (!isReadOnly()) {
     html += `<button class="btn-add-etab" onclick="addEtab()">＋ Ajouter un établissement</button>`;
   }
   container.innerHTML = html;
@@ -2416,6 +2481,7 @@ function renderEtabTabs() {
 }
 
 function saveCurrentEtab() {
+  if (isReadOnly()) return; // en lecture seule, ne rien écraser dans le state
   if (!state.currentFiche || !state.currentFiche.etabs[state.currentEtab]) return;
   const e = state.currentFiche.etabs[state.currentEtab];
   const getVal = (sel) => { const el = document.querySelector(sel); return el ? el.value : ''; };
@@ -2566,6 +2632,7 @@ function loadEtab(idx) {
 
   updateProgress();
   updateCounters();
+  applyReadOnlyMode();
 }
 
 function renderAutresConstats(idx) {
@@ -2649,19 +2716,18 @@ function selectCdp(cdpId) {
 // CONSTATS — sous-onglets par direction + rendu
 // ═══════════════════════════════════════════════════════════════════
 function getVisibleDirections() {
-  // Admin et invité voient tout. Sinon, on filtre par direction utilisateur.
+  // Admin, DESPS (admin de fait), invité et mode public voient tout
   if (!state.user) return DIRECTIONS;
-  if (state.user.role === 'admin' || state.user.direction === 'all') return DIRECTIONS;
-  if (state.publicMode) return DIRECTIONS; // mode lecture publique : tout visible
+  if (isAdmin() || state.user.direction === 'all') return DIRECTIONS;
+  if (state.user.role === 'guest' || state.publicMode) return DIRECTIONS;
   if (state.user.direction) {
     // ─── Règle métier : tous les utilisateurs ont accès au questionnaire DCEP
     // en plus de leur direction de rattachement (DCEP = socle technique commun) ───
     if (state.user.direction === 'dcep') {
-      // L'utilisateur DCEP ne voit que DCEP (sa propre direction)
       const dir = DIRECTIONS.find(d => d.id === 'dcep');
       return dir ? [dir] : DIRECTIONS;
     }
-    // Autres directions : DCEP + leur propre direction (dans l'ordre des DIRECTIONS)
+    // Autres directions : DCEP + leur propre direction
     const userDir = DIRECTIONS.find(d => d.id === state.user.direction);
     const dcep = DIRECTIONS.find(d => d.id === 'dcep');
     const visible = [];
@@ -3411,6 +3477,7 @@ function closeLogin() { $('loginScreen').classList.remove('open'); }
 function renderUserChip() {
   if (!state.user) {
     $('userChip').style.display = 'none';
+    applyReadOnlyMode();
     return;
   }
   const u = state.user;
@@ -3422,15 +3489,20 @@ function renderUserChip() {
   if (u.role === 'admin') {
     $('userRoleBadge').style.display = '';
     $('userRoleBadge').textContent = 'ADMIN';
+  } else if (u.direction === 'desps') {
+    // DESPS = admin de fait : afficher le double badge
+    $('userRoleBadge').style.display = '';
+    $('userRoleBadge').textContent = 'DESPS · ADMIN';
   } else if (u.role === 'guest') {
     $('userRoleBadge').style.display = '';
-    $('userRoleBadge').textContent = 'INVITÉ';
+    $('userRoleBadge').textContent = 'INVITÉ · LECTURE';
   } else if (dir) {
     $('userRoleBadge').style.display = '';
     $('userRoleBadge').textContent = dir.code;
   } else {
     $('userRoleBadge').style.display = 'none';
   }
+  applyReadOnlyMode();
 }
 
 function openUserMenu() {
@@ -3447,11 +3519,69 @@ function openUserMenu() {
   openModal('modalUserMenu');
 }
 
-function isAdmin() { return state.user && state.user.role === 'admin'; }
+// DESPS (Direction de la Digitalisation) a un statut d'administrateur de fait
+// car responsable institutionnel de la plateforme.
+function isAdmin() {
+  if (!state.user) return false;
+  if (state.user.role === 'admin') return true;
+  // DESPS = administrateur de fait
+  if (state.user.direction === 'desps') return true;
+  return false;
+}
 function canEditFiche(f) {
   if (!state.user || !f) return false;
-  if (state.user.role === 'admin') return true;
+  // Lecture seule pour l'invité
+  if (state.user.role === 'guest' || state.publicMode) return false;
+  if (isAdmin()) return true;
   return f.createdBy === state.user.uid;
+}
+function isReadOnly() {
+  if (!state.user) return true;
+  if (state.user.role === 'guest') return true;
+  if (state.publicMode) return true;
+  return false;
+}
+
+// Active/désactive globalement le mode lecture seule (invité ou mode public)
+function applyReadOnlyMode() {
+  const readOnly = isReadOnly();
+  document.body.classList.toggle('read-only', readOnly);
+  // Désactiver tous les inputs/textarea/select pour empêcher saisie clavier
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    if (el.type === 'button' || el.type === 'submit') return;
+    // Ne pas désactiver les inputs des modales de login (sinon impossible de se connecter)
+    if (el.closest('#modalLogin, #modalShare')) return;
+    if (readOnly) {
+      el.setAttribute('readonly', 'readonly');
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'disabled');
+    } else {
+      el.removeAttribute('readonly');
+      if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+    }
+  });
+}
+
+// MutationObserver : réappliquer le mode read-only quand de nouveaux inputs sont rendus
+let _readOnlyObserver = null;
+function startReadOnlyObserver() {
+  if (_readOnlyObserver) return;
+  _readOnlyObserver = new MutationObserver((mutations) => {
+    if (!isReadOnly()) return;
+    let hasNew = false;
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeType === 1) {
+          if (node.matches?.('input, textarea, select') || node.querySelector?.('input, textarea, select')) {
+            hasNew = true;
+            break;
+          }
+        }
+      }
+      if (hasNew) break;
+    }
+    if (hasNew) applyReadOnlyMode();
+  });
+  _readOnlyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -3636,6 +3766,7 @@ function loadFiche(f) {
 }
 
 function newFiche() {
+  if (isReadOnly()) return toast('Mode lecture seule — création de fiche impossible', 'error');
   if (state.currentFiche) {
     if (!confirm('Créer une nouvelle fiche ? La fiche actuelle sera enregistrée.')) return;
     saveFicheNow(true);
@@ -3978,6 +4109,10 @@ function collectFicheFromUI() {
 }
 
 function saveFicheNow(silent) {
+  if (isReadOnly()) {
+    if (!silent) toast('Mode lecture seule — connectez-vous pour modifier', 'error');
+    return;
+  }
   const f = collectFicheFromUI();
   if (!f) return;
   // Ajouter ou mettre à jour dans state.fiches
@@ -6247,6 +6382,9 @@ async function generateReport() {
 // ═══════════════════════════════════════════════════════════════════
 async function init() {
   loadFromLS();
+
+  // Observer pour propager le mode read-only aux inputs ajoutés dynamiquement
+  startReadOnlyObserver();
 
   // Préchargement en arrière-plan des bibliothèques d'export (non bloquant)
   // Si elles sont déjà dans le HTML head, ensureLib retournera immédiatement.
