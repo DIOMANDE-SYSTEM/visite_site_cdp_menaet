@@ -1797,9 +1797,9 @@
             <div style="font-size:13px;color:var(--grey);">Gestion des comptes utilisateurs</div>
             <button class="btn btn-primary" onclick="openUserAddModal()">＋ Nouvel utilisateur</button>
           </div>
-          <div style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
-            <table class="data-table">
-              <thead><tr><th>Nom</th><th>Email</th><th>Direction</th><th>Rôle</th><th style="width:90px;">Actions</th></tr></thead>
+          <div style="max-height:400px;overflow:auto;border:1px solid var(--border);border-radius:8px;">
+            <table class="data-table" style="min-width:720px;">
+              <thead><tr><th>Nom</th><th>Email</th><th>Mot de passe</th><th>Direction</th><th>Rôle</th><th style="width:120px;">Actions</th></tr></thead>
               <tbody id="usersBody"></tbody>
             </table>
           </div>
@@ -4518,20 +4518,64 @@ function renderUsersTable() {
   const tbody = $('usersBody');
   if (!tbody) return;
   if (!state.users.length) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Aucun utilisateur</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty">Aucun utilisateur</div></td></tr>`;
     return;
   }
   tbody.innerHTML = state.users.map(u => {
     const dir = DIRECTIONS.find(d => d.id === u.direction);
+    const pwd = u.password || '';
+    const masked = pwd ? '•'.repeat(Math.min(pwd.length, 10)) : '<span style="color:var(--grey);font-style:italic;">aucun</span>';
     return `
     <tr>
       <td><strong>${escapeHtml(u.name)}</strong></td>
       <td><span style="font-size:12px;">${escapeHtml(u.email)}</span></td>
+      <td>
+        <span id="pwd_${u.id}" data-pwd="${escapeHtml(pwd)}" data-revealed="0" style="font-family:monospace;font-size:13px;color:var(--navy);user-select:all;">${masked}</span>
+        ${pwd ? `<button class="btn" style="padding:2px 6px;font-size:11px;margin-left:6px;" onclick="togglePwdReveal('${u.id}')" title="Afficher / masquer le mot de passe">👁️</button>` : ''}
+      </td>
       <td>${dir ? `<span class="badge soumise">${escapeHtml(dir.code)}</span>` : '<span style="color:var(--grey);">—</span>'}</td>
       <td><span class="badge ${u.role === 'admin' ? 'validee' : 'brouillon'}">${u.role.toUpperCase()}</span></td>
-      <td><button class="btn" style="padding:4px 8px;font-size:11px;" onclick="editUser('${u.id}')">✎</button></td>
+      <td>
+        <button class="btn" style="padding:4px 8px;font-size:11px;" onclick="editUser('${u.id}')" title="Modifier l'utilisateur">✎</button>
+        <button class="btn btn-red" style="padding:4px 8px;font-size:11px;margin-left:4px;" onclick="deleteUserById('${u.id}')" title="Supprimer l'utilisateur">🗑️</button>
+      </td>
     </tr>`;
   }).join('');
+}
+
+// Affiche / masque temporairement le mot de passe en clair dans la table admin
+function togglePwdReveal(userId) {
+  const span = document.getElementById('pwd_' + userId);
+  if (!span) return;
+  const pwd = span.getAttribute('data-pwd') || '';
+  const revealed = span.getAttribute('data-revealed') === '1';
+  if (revealed) {
+    span.textContent = '•'.repeat(Math.min(pwd.length, 10));
+    span.setAttribute('data-revealed', '0');
+  } else {
+    span.textContent = pwd;
+    span.setAttribute('data-revealed', '1');
+  }
+}
+
+// Suppression directe d'un utilisateur depuis la table (action 🗑️)
+async function deleteUserById(userId) {
+  const u = state.users.find(x => x.id === userId);
+  if (!u) return;
+  // Garde-fou : empêcher l'auto-suppression de l'admin connecté
+  if (state.user && (state.user.uid === userId || state.user.uid === u.id)) {
+    return toast('Vous ne pouvez pas supprimer votre propre compte', 'error');
+  }
+  if (!confirm(`Supprimer définitivement le compte de ${u.name || u.email} ?\n\nCette action est irréversible.`)) return;
+  state.users = state.users.filter(x => x.id !== userId);
+  saveLocal('users');
+  // Sync Firebase si disponible
+  if (state.fb) {
+    try { await window._fb.deleteDoc(window._fb.doc(state.fb.db, COL.users, userId)); }
+    catch(e) { console.warn('Sync Firebase suppression échouée:', e); }
+  }
+  renderUsersTable();
+  toast(`Compte ${u.name || u.email} supprimé`, 'success');
 }
 
 function openUserAddModal() {
@@ -4554,7 +4598,9 @@ function editUser(id) {
   $('usrPwd').value = u.password || '';
   $('usrRole').value = u.role || 'user';
   $('usrDir').value = u.direction || '';
-  $('usrDeleteBtn').style.display = (u.id !== state.user.uid) ? '' : 'none';
+  // Masquer le bouton "Supprimer" dans la modale si c'est l'utilisateur connecté (auto-suppression interdite)
+  const isSelf = state.user && (u.id === state.user.uid);
+  $('usrDeleteBtn').style.display = isSelf ? 'none' : '';
   openModal('modalUser');
 }
 
