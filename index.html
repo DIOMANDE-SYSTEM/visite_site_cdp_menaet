@@ -1106,6 +1106,25 @@
     pointer-events: none;
     opacity: 0.6;
   }
+  /* ÉCRAN DE CONNEXION : toujours pleinement actif, même si body.read-only */
+  body.read-only #loginScreen input,
+  body.read-only #loginScreen textarea,
+  body.read-only #loginScreen select,
+  body.read-only #loginScreen button,
+  body.read-only #loginScreen .toggle-group label,
+  body.read-only #modalShare input,
+  body.read-only #modalShare button {
+    background-color: white !important;
+    color: inherit !important;
+    cursor: auto !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+  body.read-only #loginScreen input[type="button"],
+  body.read-only #loginScreen input[type="submit"],
+  body.read-only #loginScreen button {
+    cursor: pointer !important;
+  }
   body.read-only .read-only-hide {
     display: none !important;
   }
@@ -3555,7 +3574,9 @@ function canEditFiche(f) {
   return f.createdBy === state.user.uid;
 }
 function isReadOnly() {
-  if (!state.user) return true;
+  // Pas d'utilisateur connecté = on n'est pas en lecture seule (écran login actif)
+  // Le mode read-only ne s'applique QUE quand l'utilisateur est connecté en tant qu'invité
+  if (!state.user) return false;
   if (state.user.role === 'guest') return true;
   if (state.publicMode) return true;
   return false;
@@ -3570,8 +3591,9 @@ function applyReadOnlyMode() {
   // Désactiver tous les inputs/textarea/select pour empêcher saisie clavier
   document.querySelectorAll('input, textarea, select').forEach(el => {
     if (el.type === 'button' || el.type === 'submit') return;
-    // Ne pas désactiver les inputs des modales de login (sinon impossible de se connecter)
-    if (el.closest('#modalLogin, #modalShare')) return;
+    // Ne JAMAIS désactiver les inputs de l'écran de connexion ni des modales auth/partage
+    // Sinon impossible de se connecter ou de créer un compte
+    if (el.closest('#loginScreen, #modalLogin, #modalShare, .login-screen')) return;
     if (readOnly) {
       el.setAttribute('readonly', 'readonly');
       if (el.tagName === 'SELECT') el.setAttribute('disabled', 'disabled');
@@ -6408,6 +6430,9 @@ async function generateReport() {
 // ═══════════════════════════════════════════════════════════════════
 async function init() {
   loadFromLS();
+
+  // Appliquer le mode lecture seule selon l'état (au démarrage : pas d'user = pas read-only)
+  applyReadOnlyMode();
 
   // Observer pour propager le mode read-only aux inputs ajoutés dynamiquement
   startReadOnlyObserver();
